@@ -1,13 +1,12 @@
 import Image from "next/image";
 import { getImageUrl } from "@/lib/utils";
-import { Catalogue } from "@/lib/types";
+import { CatalogueType } from "@/lib/types";
 
-const ImageSlider = ({ catalogue }: { catalogue: Catalogue[] }) => {
+const ImageSlider = ({ catalogue }: { catalogue: CatalogueType[] }) => {
   return (
     <ul className="flex">
       {catalogue.map((item) => {
-        const { title, image, status, date, no, availableAt, collectionAt } =
-          item;
+        const { title, image, status, no } = item;
         if (status === "sold out" || !image) return null;
         const imgUrl = getImageUrl(image);
         return (

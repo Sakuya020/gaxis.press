@@ -10,7 +10,8 @@ const getCatalogue = async () => {
         date,
         no,
         availableAt,
-        collectionAt
+        collectionAt,
+        'thumbnail': thumbnail.asset._ref
     }
     `
   );

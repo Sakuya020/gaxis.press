@@ -1,4 +1,4 @@
-export type Catalogue = {
+export type CatalogueType = {
   title: string;
   image: null | string;
   status: "available" | "sold out" | "coming soon";
@@ -6,4 +6,5 @@ export type Catalogue = {
   no: number;
   availableAt: null | { name: string; url: string }[];
   collectionAt: null | { name: string; url: string }[];
+  thumbnail: null | string;
 };

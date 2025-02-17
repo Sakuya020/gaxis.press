@@ -1,16 +1,10 @@
 import getCatalogue from "@/lib/getCatalogue";
-import { Catalogue } from "@/lib/types";
-import CatalogueLine from "@/components/CatalogueLine";
+import { CatalogueType } from "@/lib/types";
+import Catalogue from "@/components/cat/Catalogue";
 
 const page = async () => {
-  const catalogue: Catalogue[] = await getCatalogue();
-  return (
-    <main>
-      {catalogue.map((item) => {
-        return <CatalogueLine key={item.no} item={item} />;
-      })}
-    </main>
-  );
+  const catalogue: CatalogueType[] = await getCatalogue();
+  return <Catalogue catalogue={catalogue} />;
 };
 
 export default page;

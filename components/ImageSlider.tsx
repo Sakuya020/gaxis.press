@@ -1,14 +1,6 @@
 import Image from "next/image";
 import { getImageUrl } from "@/lib/utils";
-export type Catalogue = {
-  title: string;
-  image: null | string;
-  status: "available" | "sold out" | "coming soon";
-  date: string;
-  no: number;
-  availableAt: null | string[];
-  collectionAt: null | string[];
-};
+import { Catalogue } from "@/lib/types";
 
 const ImageSlider = ({ catalogue }: { catalogue: Catalogue[] }) => {
   return (

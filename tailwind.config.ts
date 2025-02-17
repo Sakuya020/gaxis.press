@@ -12,6 +12,7 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         highlight: "var(--highlight)",
+        secondary: "var(--secondary)",
       },
     },
   },

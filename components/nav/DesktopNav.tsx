@@ -25,11 +25,10 @@ const links = {
 
 const DesktopNav = () => {
   const pathname = usePathname();
-  const router = useRouter();
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] grid grid-cols-12 border-b border-foreground">
+      <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] grid grid-cols-12 gap-[10px] border-b border-foreground bg-background">
         <div className="flex gap-[8px] col-span-7">
           <div className="text-highlight">G Axis Press is</div>
           <div>

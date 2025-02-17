@@ -1,3 +1,13 @@
-export default function Home() {
-  return <main>Hello World</main>;
+import getCatalogue from "@/lib/getCatalogue";
+import ImageSlider from "@/components/ImageSlider";
+import { Catalogue } from "@/components/ImageSlider";
+
+export default async function Home() {
+  const catalogue: Catalogue[] = await getCatalogue();
+
+  return (
+    <main>
+      <ImageSlider catalogue={catalogue} />
+    </main>
+  );
 }

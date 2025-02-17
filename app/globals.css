@@ -5,6 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #111111;
+  --highlight: #6400ff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,10 +19,18 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-dm-mono);
+  font-size: 12px;
+  line-height: 20px;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+@layer components {
+  .active-link {
+    @apply text-highlight underline;
   }
 }

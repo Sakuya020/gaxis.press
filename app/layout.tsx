@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Mono } from "next/font/google";
 import "./globals.css";
+import DesktopNav from "@/components/nav/DesktopNav";
 
 const dmMono = DM_Mono({
   weight: ["300", "400", "500"],
@@ -20,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmMono.variable} antialiased`}>{children}</body>
+      <body className={`${dmMono.variable} antialiased`}>
+        <DesktopNav />
+        {children}
+      </body>
     </html>
   );
 }

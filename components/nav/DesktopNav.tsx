@@ -2,7 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useSidebarStore } from "@/lib/store/sidebar";
 
 const links = {
   joyce: {
@@ -25,6 +26,8 @@ const links = {
 
 const DesktopNav = () => {
   const pathname = usePathname();
+  const isOpen = useSidebarStore((state) => state.isOpen);
+  const setIsOpen = useSidebarStore((state) => state.setIsOpen);
 
   return (
     <>
@@ -54,10 +57,29 @@ const DesktopNav = () => {
           </div>
         </div>
         <ul className="flex col-start-8 col-span-4 gap-[8px]">
-          <li>(Past and Upcoming Events)</li>
+          <li>
+            <button
+              type="button"
+              className={cn(
+                "cursor-pointer select-none hover:text-highlight",
+                isOpen && "active-link"
+              )}
+              onClick={() => {
+                setIsOpen(!isOpen);
+              }}
+            >
+              (Past and Upcoming Events)
+            </button>
+          </li>
           <li>/</li>
           <li>
-            <Link href="/" className={cn(pathname === "/" && "active-link")}>
+            <Link
+              href="/"
+              className={cn(
+                "hover:text-highlight",
+                pathname === "/" && "active-link"
+              )}
+            >
               IMG Library
             </Link>
           </li>
@@ -65,7 +87,10 @@ const DesktopNav = () => {
           <li>
             <Link
               href="/full_catalogue"
-              className={cn(pathname === "/full_catalogue" && "active-link")}
+              className={cn(
+                "hover:text-highlight",
+                pathname === "/full_catalogue" && "active-link"
+              )}
             >
               Full Catalogue
             </Link>

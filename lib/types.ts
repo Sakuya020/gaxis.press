@@ -8,3 +8,8 @@ export type CatalogueType = {
   collectionAt: null | { name: string; url: string }[];
   thumbnail: null | string;
 };
+
+export type EventType = {
+  date: string;
+  description: any;
+};

@@ -4,15 +4,18 @@ import { useState } from "react";
 import CatalogueLine from "./CatalogueLine";
 import { CatalogueType } from "@/lib/types";
 import Modal from "./Modal";
+import { useSidebarStore } from "@/lib/store/sidebar";
 
 const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
   const [modal, setModal] = useState({ active: false, no: 0 });
+  const isOpen = useSidebarStore((state) => state.isOpen);
+
   return (
     <section className="relative">
       {catalogue.map((item) => {
         return <CatalogueLine key={item.no} item={item} setModal={setModal} />;
       })}
-      {modal.active && (
+      {modal.active && !isOpen && (
         <Modal
           modal={modal}
           catalogue={catalogue}

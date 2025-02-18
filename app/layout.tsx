@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { DM_Mono } from "next/font/google";
 import "./globals.css";
 import DesktopNav from "@/components/nav/DesktopNav";
+import Sidebar from "@/components/events/Sidebar";
+import GlobalClickHandler from "@/components/events/GlobalClickHandler";
 
 const dmMono = DM_Mono({
   weight: ["300", "400", "500"],
@@ -22,8 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${dmMono.variable} antialiased`}>
+        <GlobalClickHandler />
         <DesktopNav />
         {children}
+        <Sidebar />
       </body>
     </html>
   );

@@ -19,7 +19,9 @@ const DesktopNav = () => {
       <nav
         className={cn(
           "fixed top-0 left-0 right-0 h-[125px] p-[30px] pb-[10px] border-b border-foreground flex flex-col justify-between z-10 md:hidden",
-          pathname === "/" && "text-background border-0"
+          pathname === "/"
+            ? "text-background border-0"
+            : "bg-secondaryBackground"
         )}
       >
         {/* intro */}

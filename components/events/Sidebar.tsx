@@ -4,6 +4,7 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import Events from "./Events";
+import { useRef } from "react";
 
 gsap.registerPlugin(useGSAP);
 
@@ -11,8 +12,14 @@ gsap.registerPlugin(useGSAP);
 
 const EventsSidebar = () => {
   const { isOpen } = useSidebarStore();
+  const isFirstRender = useRef(true);
 
   useGSAP(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     if (isOpen) {
       gsap.to(["body", "nav"], {
         backgroundColor: "#F2F2F2",
@@ -40,10 +47,10 @@ const EventsSidebar = () => {
         duration: 0.3,
       });
     }
-  }, [isOpen]); // 依赖于 isOpen 状态
+  }, [isOpen]);
 
   return (
-    <aside className="events-sidebar fixed w-[41.6vw] h-full top-[150px] right-0 bg-background z-20 border-l border-l-foreground border-b ">
+    <aside className="events-sidebar fixed w-0 h-full top-[150px] right-0 bg-background z-20 border-l border-l-foreground border-b">
       <Events />
     </aside>
   );

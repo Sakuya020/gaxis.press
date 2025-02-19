@@ -1,13 +1,13 @@
-import getCatalogue from "@/lib/getCatalogue";
-import ImageSlider from "@/components/ImageSlider";
-import { CatalogueType } from "@/lib/types";
+import ImageSlider from "@/components/img_library/ImageSlider";
+import { ImageType } from "@/lib/types";
+import getImages from "@/lib/getImages";
 
 export default async function Home() {
-  const catalogue: CatalogueType[] = await getCatalogue();
+  const images: ImageType[] = await getImages();
 
   return (
     <main>
-      <ImageSlider catalogue={catalogue} />
+      <ImageSlider images={images} />
     </main>
   );
 }

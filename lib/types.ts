@@ -13,3 +13,8 @@ export type EventType = {
   date: string;
   description: any;
 };
+
+export type ImageType = {
+  title: string;
+  image: null | string;
+};

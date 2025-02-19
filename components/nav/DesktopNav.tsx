@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/lib/store/sidebar";
+import ImageTitle from "@/components/img_library/ImageTitle";
 
 const links = {
   joyce: {
@@ -31,71 +32,82 @@ const DesktopNav = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] grid grid-cols-12 gap-[10px] border-b border-foreground bg-background">
-        <div className="flex gap-[8px] col-span-7">
-          <div className="text-highlight">G Axis Press is</div>
-          <div>
-            <p>
-              the self-publication practice of NY-based designer{" "}
-              <a href={links.joyce.href} className="underline" target="_blank">
-                {links.joyce.name}
-              </a>
-            </p>
-            <p>
-              <a href={links.us.href} className="underline" target="_blank">
-                {links.us.name}
-              </a>{" "}
-              /{" "}
-              <a href={links.china.href} className="underline" target="_blank">
-                {links.china.name}
-              </a>{" "}
-              /{" "}
-              <a href={links.email.href} target="_blank">
-                {links.email.name}
-              </a>
-            </p>
+      <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] pb-[20px] border-b border-foreground bg-background flex flex-col justify-between z-10">
+        <div className="grid grid-cols-12 gap-[10px] w-full">
+          <div className="flex gap-[8px] col-span-7">
+            <span className="text-highlight">G Axis Press is</span>
+            <div>
+              <p>
+                the self-publication practice of NY-based designer{" "}
+                <a
+                  href={links.joyce.href}
+                  className="underline"
+                  target="_blank"
+                >
+                  {links.joyce.name}
+                </a>
+              </p>
+              <p>
+                <a href={links.us.href} className="underline" target="_blank">
+                  {links.us.name}
+                </a>{" "}
+                /{" "}
+                <a
+                  href={links.china.href}
+                  className="underline"
+                  target="_blank"
+                >
+                  {links.china.name}
+                </a>{" "}
+                /{" "}
+                <a href={links.email.href} target="_blank">
+                  {links.email.name}
+                </a>
+              </p>
+            </div>
           </div>
+          <ul className="flex col-start-8 col-span-4 gap-[8px]">
+            <li>
+              <button
+                type="button"
+                className={cn(
+                  "cursor-pointer select-none hover:text-highlight",
+                  isOpen && "active-link"
+                )}
+                onClick={() => {
+                  setIsOpen(!isOpen);
+                }}
+              >
+                (Past and Upcoming Events)
+              </button>
+            </li>
+            <li>/</li>
+            <li>
+              <Link
+                href="/"
+                className={cn(
+                  "hover:text-highlight",
+                  pathname === "/" && "active-link"
+                )}
+              >
+                IMG Library
+              </Link>
+            </li>
+            <li>/</li>
+            <li>
+              <Link
+                href="/full_catalogue"
+                className={cn(
+                  "hover:text-highlight",
+                  pathname === "/full_catalogue" && "active-link"
+                )}
+              >
+                Full Catalogue
+              </Link>
+            </li>
+          </ul>
         </div>
-        <ul className="flex col-start-8 col-span-4 gap-[8px]">
-          <li>
-            <button
-              type="button"
-              className={cn(
-                "cursor-pointer select-none hover:text-highlight",
-                isOpen && "active-link"
-              )}
-              onClick={() => {
-                setIsOpen(!isOpen);
-              }}
-            >
-              (Past and Upcoming Events)
-            </button>
-          </li>
-          <li>/</li>
-          <li>
-            <Link
-              href="/"
-              className={cn(
-                "hover:text-highlight",
-                pathname === "/" && "active-link"
-              )}
-            >
-              IMG Library
-            </Link>
-          </li>
-          <li>/</li>
-          <li>
-            <Link
-              href="/full_catalogue"
-              className={cn(
-                "hover:text-highlight",
-                pathname === "/full_catalogue" && "active-link"
-              )}
-            >
-              Full Catalogue
-            </Link>
-          </li>
-        </ul>
+        <ImageTitle />
       </nav>
       <div className="h-[150px]"></div>
     </>

@@ -11,7 +11,7 @@ import { useCurrentImageStore } from "@/lib/store/currentImage";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const ImageSlider = ({ images }: { images: ImageType[] }) => {
+const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const setCurrentImage = useCurrentImageStore(
@@ -26,7 +26,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     if (!sectionRef.current || !wrapperRef.current) return;
 
     const items = wrapperRef.current.querySelectorAll(".item");
-    const viewportHeight = window.innerHeight - 150;
+    const viewportHeight = window.innerHeight;
     const slideWidth = (viewportHeight * 2000) / 1030;
     const margin = window.innerWidth - slideWidth;
     const triggerPoint = window.innerWidth / 3;
@@ -41,7 +41,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       scrollTrigger: {
         trigger: sectionRef.current,
         pin: true,
-        start: "top top+=150px",
+        start: "top top",
         end: () => `+=${slideWidth * (items.length - 2) + margin}`,
         scrub: 1,
         onUpdate: (self) => {
@@ -83,10 +83,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   });
 
   return (
-    <div
-      ref={sectionRef}
-      className="w-full h-[calc(100vh-150px)] hidden md:block"
-    >
+    <div ref={sectionRef} className="w-full h-[calc(100vh-130px)] md:hidden">
       <div ref={wrapperRef} className="h-full">
         <div className="relative h-full">
           {images.map((item, index) => {
@@ -96,7 +93,12 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             return (
               <div key={title} className="item absolute inset-0 h-full">
                 <figure className="relative h-full aspect-[2000/1030]">
-                  <Image src={imgUrl} alt={title} fill />
+                  <Image
+                    src={imgUrl}
+                    alt={title}
+                    fill
+                    className="object-cover"
+                  />
                 </figure>
               </div>
             );
@@ -107,4 +109,4 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   );
 };
 
-export default ImageSlider;
+export default MobileImageSlider;

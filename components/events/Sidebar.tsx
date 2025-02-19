@@ -24,8 +24,8 @@ const EventsSidebar = () => {
 
     if (isOpen) {
       if (pathname === "/full_catalogue") {
-        gsap.to(["body", "nav", "footer"], {
-          backgroundColor: "#F2F2F2",
+        gsap.to(["body", ".desktop-nav", "footer"], {
+          backgroundColor: "var(--secondary-background)",
           duration: 0,
         });
       }
@@ -34,27 +34,30 @@ const EventsSidebar = () => {
         ".events-sidebar",
         {
           width: "0px",
+          border: "none",
         },
         {
           width: "41.6vw",
+          borderLeft: "1px solid var(--foreground)",
           duration: 0.3,
         }
       );
     } else {
-      gsap.to(["body", "nav", "footer"], {
+      gsap.to(["body", ".desktop-nav", "footer"], {
         backgroundColor: "var(--background)",
         duration: 0,
       });
 
       gsap.to(".events-sidebar", {
         width: "0px",
+        border: "none",
         duration: 0.3,
       });
     }
   }, [isOpen]);
 
   return (
-    <aside className="events-sidebar fixed w-0 h-full top-[150px] right-0 bg-background z-20 border-l border-l-foreground border-b">
+    <aside className="events-sidebar fixed w-0 h-full top-[150px] right-0 bg-background z-20 border-b">
       <Events />
     </aside>
   );

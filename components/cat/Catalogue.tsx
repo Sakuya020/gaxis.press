@@ -17,7 +17,7 @@ const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
   });
 
   return (
-    <section className="relative">
+    <section className="relative h-screen bg-secondaryBackground md:bg-background">
       {sortedCatalogue.map((item) => {
         return <CatalogueLine key={item.no} item={item} setModal={setModal} />;
       })}
@@ -25,7 +25,7 @@ const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
         <Modal
           modal={modal}
           catalogue={catalogue}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[222px] h-[222px] border border-foreground"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[222px] h-[222px] border border-foreground hidden md:block"
         />
       )}
     </section>

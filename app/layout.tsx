@@ -4,6 +4,8 @@ import "./globals.css";
 import DesktopNav from "@/components/nav/DesktopNav";
 import Sidebar from "@/components/events/Sidebar";
 import GlobalClickHandler from "@/components/events/GlobalClickHandler";
+import MobileNav from "@/components/nav/MobileNav";
+import MobileFooter from "@/components/footer/MobileFooter";
 
 const dmMono = DM_Mono({
   weight: ["300", "400", "500"],
@@ -26,8 +28,10 @@ export default function RootLayout({
       <body className={`${dmMono.variable} antialiased`}>
         <GlobalClickHandler />
         <DesktopNav />
+        <MobileNav />
         {children}
         <Sidebar />
+        <MobileFooter />
       </body>
     </html>
   );

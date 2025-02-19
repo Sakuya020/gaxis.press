@@ -29,13 +29,18 @@ const DesktopNav = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] pb-[20px] border-b border-foreground bg-background flex flex-col justify-between z-10">
+      <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] pb-[20px] border-b border-foreground bg-background flex-col justify-between z-10 hidden md:flex desktop-nav">
         <div className="grid grid-cols-12 gap-[10px] w-full">
           {/* intro */}
           <div className="flex gap-[8px] col-span-7">
-            <span className="text-highlight">G Axis Press is</span>
+            <span className="hidden lg:block text-highlight">
+              G Axis Press is
+            </span>
             <div>
               <p>
+                <span className="lg:hidden text-highlight">
+                  G Axis Press is{" "}
+                </span>
                 the self-publication practice of NY-based designer{" "}
                 <a
                   href={links.joyce.href}
@@ -70,7 +75,7 @@ const DesktopNav = () => {
         {pathname == "/" && <ImageTitle />}
         {pathname == "/full_catalogue" && <ReverseOrder />}
       </nav>
-      <div className="h-[150px]"></div>
+      <div className="hidden md:block h-[150px]"></div>
     </>
   );
 };

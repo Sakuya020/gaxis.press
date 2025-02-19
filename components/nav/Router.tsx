@@ -11,8 +11,8 @@ const Router = () => {
   const setIsOpen = useSidebarStore((state) => state.setIsOpen);
 
   return (
-    <ul className="flex col-start-8 col-span-4 gap-[8px]">
-      <li>
+    <p className="col-start-8 col-span-4 text-wrap">
+      <span>
         <button
           type="button"
           className={cn(
@@ -25,21 +25,23 @@ const Router = () => {
         >
           (Past and Upcoming Events)
         </button>
-      </li>
-      <li>/</li>
-      <li>
+        <span className="px-2">/</span>
+      </span>
+
+      <span>
         <Link
           href="/"
           className={cn(
-            "hover:text-highlight",
+            "hover:text-highlight ",
             pathname === "/" && "active-link"
           )}
         >
           IMG Library
         </Link>
-      </li>
-      <li>/</li>
-      <li>
+      </span>
+
+      <span>
+        <span className="px-2">/</span>
         <Link
           href="/full_catalogue"
           className={cn(
@@ -49,8 +51,8 @@ const Router = () => {
         >
           Full Catalogue
         </Link>
-      </li>
-    </ul>
+      </span>
+    </p>
   );
 };
 

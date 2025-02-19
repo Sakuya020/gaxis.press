@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import Events from "./Events";
 import { useRef } from "react";
+import { usePathname } from "next/navigation";
 
 gsap.registerPlugin(useGSAP);
 
@@ -13,6 +14,7 @@ gsap.registerPlugin(useGSAP);
 const EventsSidebar = () => {
   const { isOpen } = useSidebarStore();
   const isFirstRender = useRef(true);
+  const pathname = usePathname();
 
   useGSAP(() => {
     if (isFirstRender.current) {
@@ -21,10 +23,12 @@ const EventsSidebar = () => {
     }
 
     if (isOpen) {
-      gsap.to(["body", "nav"], {
-        backgroundColor: "#F2F2F2",
-        duration: 0,
-      });
+      if (pathname === "/full_catalogue") {
+        gsap.to(["body", "nav"], {
+          backgroundColor: "#F2F2F2",
+          duration: 0,
+        });
+      }
 
       gsap.fromTo(
         ".events-sidebar",

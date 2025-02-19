@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import ImageTitle from "@/components/img_library/ImageTitle";
+import { useCurrentImageStore } from "@/lib/store/currentImage";
+import ReverseOrder from "@/components/events/ReverseOrder";
 
 const links = {
   joyce: {
@@ -29,11 +31,13 @@ const DesktopNav = () => {
   const pathname = usePathname();
   const isOpen = useSidebarStore((state) => state.isOpen);
   const setIsOpen = useSidebarStore((state) => state.setIsOpen);
+  const { setCurrentImage } = useCurrentImageStore();
 
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] pb-[20px] border-b border-foreground bg-background flex flex-col justify-between z-10">
         <div className="grid grid-cols-12 gap-[10px] w-full">
+          {/* intro */}
           <div className="flex gap-[8px] col-span-7">
             <span className="text-highlight">G Axis Press is</span>
             <div>
@@ -66,6 +70,7 @@ const DesktopNav = () => {
               </p>
             </div>
           </div>
+          {/* routers */}
           <ul className="flex col-start-8 col-span-4 gap-[8px]">
             <li>
               <button
@@ -107,7 +112,8 @@ const DesktopNav = () => {
             </li>
           </ul>
         </div>
-        <ImageTitle />
+        {pathname == "/" && <ImageTitle />}
+        {pathname == "/full_catalogue" && <ReverseOrder />}
       </nav>
       <div className="h-[150px]"></div>
     </>

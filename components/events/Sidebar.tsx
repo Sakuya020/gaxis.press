@@ -27,7 +27,7 @@ const EventsSidebar = () => {
     const updateSidebarWidth = () => {
       if (isOpen) {
         if (pathname === "/full_catalogue") {
-          gsap.to(["body", ".desktop-nav", "footer"], {
+          gsap.to(["body", ".desktop-nav", ".desktop-footer"], {
             backgroundColor: "var(--secondary-background)",
             duration: 0,
           });
@@ -52,7 +52,7 @@ const EventsSidebar = () => {
           }
         );
       } else {
-        gsap.to(["body", ".desktop-nav", "footer"], {
+        gsap.to(["body", ".desktop-nav", ".desktop-footer"], {
           backgroundColor: mediaQueryMedium.matches
             ? "var(--background)"
             : "var(--secondary-background)",

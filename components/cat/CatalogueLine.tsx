@@ -12,7 +12,7 @@ const CatalogueLine = ({
   const formattedDate = formatDate(date);
 
   return (
-    <div className="grid grid-cols-5 gap-[6px] md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]">
+    <div className="grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]">
       {/* No. */}
       <div className="col-span-1 py-[10px] md:py-[20px]">No.{no}</div>
       {/* Date */}
@@ -22,7 +22,7 @@ const CatalogueLine = ({
       {/* title */}
       <div
         className={cn(
-          "col-span-4 md:col-span-5 py-[10px] md:py-[20px]",
+          "col-span-5 md:col-span-5 py-[10px] md:py-[20px]",
           status === "sold out" && "line-through"
         )}
         onMouseEnter={() => setModal({ active: true, no })}

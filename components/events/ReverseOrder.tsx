@@ -6,7 +6,10 @@ import { cn } from "@/lib/utils";
 const ReverseOrder = () => {
   const { order, setOrder } = useCatalogueOrderStore();
   return (
-    <button onClick={() => setOrder(order == "asc" ? "desc" : "asc")}>
+    <button
+      onClick={() => setOrder(order == "asc" ? "desc" : "asc")}
+      className="w-auto"
+    >
       <svg
         width="10"
         height="15"

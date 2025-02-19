@@ -15,7 +15,7 @@ const DesktopNav = () => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 h-[120px] p-[30px] pb-[10px] border-b border-foreground bg-secondaryBackground flex flex-col justify-between z-10 md:hidden">
+      <nav className="fixed top-0 left-0 right-0 h-[125px] p-[30px] pb-[10px] border-b border-foreground bg-secondaryBackground flex flex-col justify-between z-10 md:hidden">
         {/* intro */}
 
         <p>
@@ -28,7 +28,7 @@ const DesktopNav = () => {
 
         {pathname == "/full_catalogue" && <ReverseOrder />}
       </nav>
-      <div className="h-[120px] md:hidden"></div>
+      <div className="h-[125px] md:hidden"></div>
     </>
   );
 };

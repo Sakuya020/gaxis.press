@@ -1,12 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSidebarStore } from "@/lib/store/sidebar";
 import ImageTitle from "@/components/img_library/ImageTitle";
-import { useCurrentImageStore } from "@/lib/store/currentImage";
 import ReverseOrder from "@/components/events/ReverseOrder";
+import Router from "./Router";
 
 const links = {
   joyce: {
@@ -29,9 +26,6 @@ const links = {
 
 const DesktopNav = () => {
   const pathname = usePathname();
-  const isOpen = useSidebarStore((state) => state.isOpen);
-  const setIsOpen = useSidebarStore((state) => state.setIsOpen);
-  const { setCurrentImage } = useCurrentImageStore();
 
   return (
     <>
@@ -71,46 +65,7 @@ const DesktopNav = () => {
             </div>
           </div>
           {/* routers */}
-          <ul className="flex col-start-8 col-span-4 gap-[8px]">
-            <li>
-              <button
-                type="button"
-                className={cn(
-                  "cursor-pointer select-none hover:text-highlight",
-                  isOpen && "active-link"
-                )}
-                onClick={() => {
-                  setIsOpen(!isOpen);
-                }}
-              >
-                (Past and Upcoming Events)
-              </button>
-            </li>
-            <li>/</li>
-            <li>
-              <Link
-                href="/"
-                className={cn(
-                  "hover:text-highlight",
-                  pathname === "/" && "active-link"
-                )}
-              >
-                IMG Library
-              </Link>
-            </li>
-            <li>/</li>
-            <li>
-              <Link
-                href="/full_catalogue"
-                className={cn(
-                  "hover:text-highlight",
-                  pathname === "/full_catalogue" && "active-link"
-                )}
-              >
-                Full Catalogue
-              </Link>
-            </li>
-          </ul>
+          <Router />
         </div>
         {pathname == "/" && <ImageTitle />}
         {pathname == "/full_catalogue" && <ReverseOrder />}

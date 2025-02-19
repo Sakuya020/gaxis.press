@@ -18,7 +18,7 @@ const ImageTitle = () => {
           fill="currentColor"
         ></path>
       </svg>
-      <div>{currentImage?.title}</div>
+      <p className="line-clamp-1">{currentImage?.title}</p>
     </div>
   );
 };

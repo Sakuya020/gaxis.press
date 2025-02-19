@@ -24,7 +24,7 @@ const EventsSidebar = () => {
 
     if (isOpen) {
       if (pathname === "/full_catalogue") {
-        gsap.to(["body", "nav"], {
+        gsap.to(["body", "nav", "footer"], {
           backgroundColor: "#F2F2F2",
           duration: 0,
         });
@@ -41,7 +41,7 @@ const EventsSidebar = () => {
         }
       );
     } else {
-      gsap.to(["body", "nav"], {
+      gsap.to(["body", "nav", "footer"], {
         backgroundColor: "var(--background)",
         duration: 0,
       });

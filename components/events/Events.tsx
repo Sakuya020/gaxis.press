@@ -23,10 +23,15 @@ const Events = () => {
       {events.map((event) => (
         <div
           key={event.date}
-          className="grid grid-cols-5 gap-[10px] px-[30px] border-b border-b-secondary"
+          className="grid grid-cols-8 lg:grid-cols-5 gap-[10px] px-[30px] border-b border-b-secondary"
         >
-          <div className="col-span-1 py-[20px]">{formatDate(event.date)}</div>
-          <div className="col-span-4 py-[20px] whitespace-nowrap">
+          <div className="col-span-1 py-[20px] hidden lg:block">
+            {formatDate(event.date)}
+          </div>
+          <div className="col-span-1 py-[20px] lg:hidden">
+            {formatDate(event.date).slice(2)}
+          </div>
+          <div className="col-span-7 lg:col-span-4 py-[20px] whitespace-nowrap">
             <CustomPortableText value={event.description} />
           </div>
         </div>

@@ -9,8 +9,7 @@ import { usePathname } from "next/navigation";
 
 gsap.registerPlugin(useGSAP);
 
-// ipad: 2/3,  desktop: 5/12
-
+// 768-1024: 2/3,  >1024: 5/12
 const EventsSidebar = () => {
   const { isOpen } = useSidebarStore();
   const isFirstRender = useRef(true);
@@ -22,38 +21,61 @@ const EventsSidebar = () => {
       return;
     }
 
-    if (isOpen) {
-      if (pathname === "/full_catalogue") {
+    const mediaQueryLarge = window.matchMedia("(min-width: 1024px)");
+    const mediaQueryMedium = window.matchMedia("(min-width: 768px)");
+
+    const updateSidebarWidth = () => {
+      if (isOpen) {
+        if (pathname === "/full_catalogue") {
+          gsap.to(["body", ".desktop-nav", "footer"], {
+            backgroundColor: "var(--secondary-background)",
+            duration: 0,
+          });
+        }
+
+        gsap.fromTo(
+          ".events-sidebar",
+          {
+            width: "0px",
+            border: "none",
+          },
+          {
+            width: mediaQueryLarge.matches
+              ? "43.6vw"
+              : mediaQueryMedium.matches
+                ? "71.6vw"
+                : "0vw",
+            borderLeft: mediaQueryMedium.matches
+              ? "1px solid var(--foreground)"
+              : "none",
+            duration: 0.3,
+          }
+        );
+      } else {
         gsap.to(["body", ".desktop-nav", "footer"], {
-          backgroundColor: "var(--secondary-background)",
+          backgroundColor: mediaQueryMedium.matches
+            ? "var(--background)"
+            : "var(--secondary-background)",
           duration: 0,
         });
-      }
 
-      gsap.fromTo(
-        ".events-sidebar",
-        {
+        gsap.to(".events-sidebar", {
           width: "0px",
           border: "none",
-        },
-        {
-          width: "41.6vw",
-          borderLeft: "1px solid var(--foreground)",
           duration: 0.3,
-        }
-      );
-    } else {
-      gsap.to(["body", ".desktop-nav", "footer"], {
-        backgroundColor: "var(--background)",
-        duration: 0,
-      });
+        });
+      }
+    };
 
-      gsap.to(".events-sidebar", {
-        width: "0px",
-        border: "none",
-        duration: 0.3,
-      });
-    }
+    updateSidebarWidth();
+
+    mediaQueryLarge.addEventListener("change", updateSidebarWidth);
+    mediaQueryMedium.addEventListener("change", updateSidebarWidth);
+
+    return () => {
+      mediaQueryLarge.removeEventListener("change", updateSidebarWidth);
+      mediaQueryMedium.removeEventListener("change", updateSidebarWidth);
+    };
   }, [isOpen]);
 
   return (

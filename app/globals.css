@@ -31,13 +31,9 @@ body {
   font-size: 12px;
   line-height: 20px;
   position: relative;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
-/* Webkit browsers (Chrome, Safari) */
-body::-webkit-scrollbar {
-  display: none;
+  @media (max-width: 768px) {
+    background: var(--secondary-background);
+  }
 }
 
 @layer utilities {

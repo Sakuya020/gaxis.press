@@ -17,7 +17,7 @@ const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
   });
 
   return (
-    <section className="relative h-screen bg-secondaryBackground md:bg-background">
+    <section className="relative h-auto">
       {sortedCatalogue.map((item) => {
         return <CatalogueLine key={item.no} item={item} setModal={setModal} />;
       })}

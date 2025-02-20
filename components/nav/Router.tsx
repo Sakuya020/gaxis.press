@@ -11,7 +11,7 @@ const Router = () => {
   const setIsOpen = useSidebarStore((state) => state.setIsOpen);
 
   return (
-    <p className="col-start-8 col-span-4 text-wrap">
+    <p className="col-start-8 col-span-5 text-wrap">
       <span>
         <button
           type="button"

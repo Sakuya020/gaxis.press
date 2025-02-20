@@ -7,6 +7,7 @@ const getImages = async () => {
       title,
         'image': image.asset._ref,
         status,
+        link,
     }
     `
   );

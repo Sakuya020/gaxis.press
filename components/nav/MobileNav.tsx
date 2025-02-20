@@ -18,7 +18,7 @@ const DesktopNav = () => {
     <>
       <nav
         className={cn(
-          "fixed top-0 left-0 right-0 h-[125px] p-[30px] pb-[10px] border-b border-foreground flex flex-col justify-between z-10 md:hidden",
+          "w-full h-[125px] p-[30px] pb-[10px] border-b border-foreground flex flex-col justify-between z-10 md:hidden",
           pathname === "/"
             ? "text-background border-0"
             : "bg-secondaryBackground"
@@ -36,7 +36,6 @@ const DesktopNav = () => {
 
         {pathname == "/full_catalogue" && <ReverseOrder />}
       </nav>
-      {pathname !== "/" && <div className="h-[125px] md:hidden"></div>}
     </>
   );
 };

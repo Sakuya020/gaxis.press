@@ -10,12 +10,12 @@
   --secondary-background: #f2f2f2;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #111111;
     --foreground: #ffffff;
   }
-}
+} */
 
 html,
 body {

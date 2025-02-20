@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-dm-sans)"],
+        mono: ["var(--font-dm-mono)"],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

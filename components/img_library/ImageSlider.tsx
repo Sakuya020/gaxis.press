@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import Image from "next/image";
-import { getImageUrl } from "@/lib/utils";
+import { cn, getImageUrl } from "@/lib/utils";
 import { ImageType } from "@/lib/types";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -90,12 +90,22 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       <div ref={wrapperRef} className="h-full">
         <div className="relative h-full">
           {images.map((item, index) => {
-            const { title, image } = item;
+            const { title, image, link } = item;
             if (!image) return null;
             const imgUrl = getImageUrl(image);
             return (
               <div key={title} className="item absolute inset-0 h-full">
-                <figure className="relative h-full aspect-[2000/1030]">
+                <figure
+                  className={cn(
+                    "relative h-full aspect-[2000/1030] border-l border-background",
+                    link && "cursor-pointer"
+                  )}
+                  onClick={() => {
+                    if (link) {
+                      window.open(link, "_blank");
+                    }
+                  }}
+                >
                   <Image src={imgUrl} alt={title} fill />
                 </figure>
               </div>

@@ -63,7 +63,11 @@ const DesktopNav = () => {
                   {links.china.name}
                 </a>{" "}
                 /{" "}
-                <a href={links.email.href} target="_blank">
+                <a
+                  href={links.email.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {links.email.name}
                 </a>
               </p>
@@ -72,8 +76,12 @@ const DesktopNav = () => {
           {/* routers */}
           <Router />
         </div>
-        {pathname == "/" && <ImageTitle />}
-        {pathname == "/full_catalogue" && <ReverseOrder />}
+        <div className="grid grid-cols-12 gap-[10px] w-full">
+          <div className="col-span-9">
+            {pathname == "/" && <ImageTitle />}
+            {pathname == "/full_catalogue" && <ReverseOrder />}
+          </div>
+        </div>
       </nav>
       <div className="hidden md:block h-[150px]"></div>
     </>

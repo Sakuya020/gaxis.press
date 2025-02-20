@@ -1,5 +1,5 @@
 import { CatalogueType } from "@/lib/types";
-import { getImageUrl, formatDate, cn } from "@/lib/utils";
+import { formatDate, cn } from "@/lib/utils";
 
 const CatalogueLine = ({
   item,
@@ -12,17 +12,20 @@ const CatalogueLine = ({
   const formattedDate = formatDate(date);
 
   return (
-    <div className="grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]">
+    <div
+      className="grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]"
+      key={title}
+    >
       {/* No. */}
       <div className="col-span-1 py-[10px] md:py-[20px]">No.{no}</div>
       {/* Date */}
-      <div className="col-span-1 py-[20px] hidden md:block">
+      <div className="col-span-1 py-[20px] hidden lg:block">
         {formattedDate}
       </div>
       {/* title */}
       <div
         className={cn(
-          "col-span-5 md:col-span-5 py-[10px] md:py-[20px]",
+          "col-span-5 md:col-span-6 lg:col-span-5 py-[10px] md:py-[20px]",
           status === "sold out" && "line-through"
         )}
         onMouseEnter={() => setModal({ active: true, no })}
@@ -45,10 +48,10 @@ const CatalogueLine = ({
                 {availableAt?.map((item, index) => {
                   return (
                     <div key={index} className="inline-block">
-                      {index !== 0 && <span>, </span>}
                       <a href={item.url} target="_blank" className="underline">
                         {item.name}
                       </a>
+                      {index !== availableAt.length - 1 && <span>,&nbsp;</span>}
                     </div>
                   );
                 })}
@@ -64,7 +67,6 @@ const CatalogueLine = ({
                 {collectionAt.map((item, index) => {
                   return (
                     <>
-                      {index !== 0 && <span>, </span>}
                       <a
                         href={item.url}
                         key={index}
@@ -73,6 +75,9 @@ const CatalogueLine = ({
                       >
                         {item.name}
                       </a>
+                      {index !== collectionAt.length - 1 && (
+                        <span>,&nbsp;</span>
+                      )}
                     </>
                   );
                 })}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Mono } from "next/font/google";
+import { DM_Mono, DM_Sans } from "next/font/google";
 import "./globals.css";
 import DesktopNav from "@/components/nav/DesktopNav";
 import Sidebar from "@/components/events/Sidebar";
@@ -11,6 +11,12 @@ const dmMono = DM_Mono({
   weight: ["300", "400", "500"],
   subsets: ["latin"],
   variable: "--font-dm-mono",
+});
+
+const dmSans = DM_Sans({
+  weight: ["400", "500", "700"],
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +32,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${dmMono.variable} antialiased`}>
+      <body className={`${dmMono.variable} ${dmSans.variable} antialiased`}>
         <GlobalClickHandler />
         <DesktopNav />
         <MobileNav />

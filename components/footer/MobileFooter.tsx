@@ -53,7 +53,11 @@ const MobileFooter = () => {
             </div>
           </div>
           <div className="w-1/3 h-full flex items-center justify-center border-r border-foreground">
-            <a href="mailto:joyceshidesign@gmail.com" target="_blank">
+            <a
+              href="mailto:joyceshidesign@gmail.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Contact
             </a>
           </div>

@@ -17,4 +17,5 @@ export type EventType = {
 export type ImageType = {
   title: string;
   image: null | string;
+  link: null | string;
 };

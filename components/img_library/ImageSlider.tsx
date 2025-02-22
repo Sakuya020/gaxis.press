@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { cn, getImageUrl } from "@/lib/utils";
 import { ImageType } from "@/lib/types";
@@ -14,12 +14,22 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [windowWidth, setWindowWidth] = useState(0);
   const setCurrentImage = useCurrentImageStore(
     (state) => state.setCurrentImage
   );
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     setCurrentImage(images[0]);
+    setWindowWidth(window.innerWidth);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [images]);
 
   useGSAP(() => {
@@ -27,16 +37,36 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
 
     const items = wrapperRef.current.querySelectorAll(".item");
     const viewportHeight = window.innerHeight - 150;
-    const slideWidth = (viewportHeight * 2000) / 1030;
+    const slideWidth = (viewportHeight * 2000) / 1330;
     const margin = window.innerWidth - slideWidth;
     const triggerPoint = window.innerWidth / 3;
 
-    // 设置初始状态
+    // 清除现有的动画和ScrollTrigger实例
+    ScrollTrigger.getAll().forEach((st) => st.kill());
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+    }
+    gsap.killTweensOf(items);
+
+    // 获取当前滚动进度
+    const currentProgress = timelineRef.current?.progress() || 0;
+
+    // 重新设置初始状态和位置
     items.forEach((item, index) => {
-      gsap.set(item, { x: index * slideWidth });
+      const currentX = gsap.getProperty(item, "x") as number;
+      const targetX = index * slideWidth;
+
+      // 如果已经有动画在进行，根据滚动进度计算新的位置
+      if (currentProgress > 0) {
+        const adjustedX =
+          targetX - slideWidth * currentProgress * (items.length - 1);
+        gsap.set(item, { x: Math.max(margin, adjustedX) });
+      } else {
+        gsap.set(item, { x: targetX });
+      }
     });
 
-    // 当sectionRef出现时，开始动画
+    // 创建新的时间线
     const timeline = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
@@ -58,19 +88,17 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       },
     });
 
+    // 保存时间线引用
+    timelineRef.current = timeline;
+
     items.forEach((_, index) => {
-      // 第一张图片保持不动
       if (index === 0) return;
 
-      // 获取当前位置之后的所有图片，这些图片整体向左移动，当第一张图片移动到x=0时，剩下的图片整体向左移动，直到最后一张图片移动到margin位置
       const movingItems = Array.from(items).slice(index);
 
-      //
       timeline.to(movingItems, {
         x: (i) => {
-          // i 是在 movingItems 中的索引
           const targetX = i * slideWidth;
-          // 确保最后一张图片不会超过margin位置
           if (i + index === items.length - 1) {
             return Math.max(margin, targetX);
           }
@@ -80,7 +108,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         ease: "none",
       });
     });
-  });
+  }, [images, windowWidth]); // 依赖于 windowWidth
 
   return (
     <div
@@ -97,8 +125,9 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
               <div key={title} className="item absolute inset-0 h-full">
                 <figure
                   className={cn(
-                    "relative h-full aspect-[2000/1030] border-l border-background",
-                    link && "cursor-pointer"
+                    "relative h-full aspect-[2000/1330] border-background",
+                    link && "cursor-pointer",
+                    index !== 0 && "border-l"
                   )}
                   onClick={() => {
                     if (link) {

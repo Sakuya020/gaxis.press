@@ -18,8 +18,15 @@ const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
 
   return (
     <section className="relative h-auto md:min-h-[calc(100vh-300px)]">
-      {sortedCatalogue.map((item) => {
-        return <CatalogueLine key={item.no} item={item} setModal={setModal} />;
+      {sortedCatalogue.map((item, index) => {
+        return (
+          <CatalogueLine
+            key={item.no}
+            item={item}
+            setModal={setModal}
+            isLast={index === sortedCatalogue.length - 1}
+          />
+        );
       })}
       {modal.active && !isOpen && (
         <Modal

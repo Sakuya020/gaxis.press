@@ -3,9 +3,11 @@ import { formatDate, cn } from "@/lib/utils";
 
 const CatalogueLine = ({
   item,
+  isLast,
   setModal,
 }: {
   item: CatalogueType;
+  isLast: boolean;
   setModal: (modal: { active: boolean; no: number }) => void;
 }) => {
   const { title, status, date, no, availableAt, collectionAt } = item;
@@ -13,7 +15,10 @@ const CatalogueLine = ({
 
   return (
     <div
-      className="grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]"
+      className={cn(
+        "grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]",
+        isLast && "border-0"
+      )}
       key={title}
     >
       {/* No. */}

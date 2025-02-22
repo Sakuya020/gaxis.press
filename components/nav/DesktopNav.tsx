@@ -33,15 +33,11 @@ const DesktopNav = () => {
         <div className="grid grid-cols-12 gap-[10px] w-full">
           {/* intro */}
           <div className="flex gap-[8px] col-span-7">
-            <span className="hidden lg:block text-highlight">
-              G Axis Press is
-            </span>
+            <span className="hidden lg:block text-highlight">G Axis Press</span>
             <div>
               <p>
-                <span className="lg:hidden text-highlight">
-                  G Axis Press is{" "}
-                </span>
-                the self-publication practice of NY-based designer{" "}
+                <span className="lg:hidden text-highlight">G Axis Press </span>
+                is the self-publication practice of NY-based designer{" "}
                 <a
                   href={links.joyce.href}
                   className="underline"
@@ -49,6 +45,7 @@ const DesktopNav = () => {
                 >
                   {links.joyce.name}
                 </a>
+                .
               </p>
               <p>
                 <a href={links.us.href} className="underline" target="_blank">

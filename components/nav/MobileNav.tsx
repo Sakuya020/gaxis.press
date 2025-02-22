@@ -27,11 +27,12 @@ const DesktopNav = () => {
         {/* intro */}
 
         <p>
-          <span className="md:hidden text-highlight">G Axis Press is </span>
-          the self-publication practice of NY-based designer{" "}
+          <span className="md:hidden text-highlight">G Axis Press </span>
+          is the self-publication practice of NY-based designer{" "}
           <a href={links.joyce.href} className="underline" target="_blank">
             {links.joyce.name}
           </a>
+          .
         </p>
 
         {pathname == "/full_catalogue" && <ReverseOrder />}

@@ -42,7 +42,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
 
     const items = wrapperRef.current.querySelectorAll(".item");
     const viewportHeight = dimensions.height - 150;
-    const slideWidth = (viewportHeight * 2000) / 1330;
+    const slideWidth = (viewportHeight * 2247) / 1500;
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
@@ -120,7 +120,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
               <div key={title} className="item absolute inset-0 h-full">
                 <figure
                   className={cn(
-                    "relative h-full aspect-[2000/1330] border-background",
+                    "relative h-full aspect-[2247/1500] border-background",
                     link && "cursor-pointer",
                     index !== 0 && "border-l"
                   )}

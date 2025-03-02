@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const ImageSlider = ({ images }: { images: ImageType[] }) => {
+const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -77,7 +77,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const items = wrapperRef.current.querySelectorAll(".item");
     const viewportHeight = dimensions.height - 130;
 
-    // 清除现有动画，但只清除属于该组件的动画
+    // 清除现有动画
     ScrollTrigger.getAll().forEach((st) => {
       if (st.vars.trigger === sectionRef.current) {
         st.kill();
@@ -105,15 +105,18 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       gsap.set(item, { x: Math.max(0, adjustedX) });
     });
 
-    // 创建新时间线
+    // 修改 ScrollTrigger 配置
     timelineRef.current = gsap.timeline({
       scrollTrigger: {
-        id: "mobile-slider", // 添加唯一标识
+        id: "mobile-slider",
         trigger: sectionRef.current,
         pin: true,
+        pinSpacing: true, // 确保固定时保持间距
         start: "top top",
         end: () => `+=${dimensions.width * (items.length - 2)}`,
         scrub: 1,
+        anticipatePin: 1, // 添加这个属性来优化固定效果
+        pinType: "fixed", // 使用 fixed 定位来防止抖动
       },
     });
 
@@ -137,9 +140,9 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   return (
     <div
       ref={sectionRef}
-      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
+      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none overflow-hidden"
     >
-      <div ref={wrapperRef} className="h-full">
+      <div ref={wrapperRef} className="h-full relative">
         <div className="relative h-full">
           {images.map((item, index) => {
             const { title, image, link } = item;
@@ -175,4 +178,4 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   );
 };
 
-export default ImageSlider;
+export default MobileImageSlider;

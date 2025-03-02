@@ -86,23 +86,10 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
     if (timelineRef.current) timelineRef.current.kill();
     gsap.killTweensOf(items);
 
-    // 获取当前进度并重置位置
-    const currentProgress = timelineRef.current?.progress() || 0;
-    items.forEach((item, index) => {
-      if (index === 0) {
-        gsap.set(item, { x: 0 }); // 第一张图片固定在 x=0
-        return;
-      }
-      // 计算初始位置：每张图片的位置是屏幕宽度 * index，然后向左偏移 20% 屏幕宽度
-      const initialX = dimensions.width * index - dimensions.width * 0.2;
-      const targetX = index * dimensions.width;
-
-      const adjustedX =
-        currentProgress > 0
-          ? initialX - dimensions.width * currentProgress * (items.length - 1)
-          : initialX;
-
-      gsap.set(item, { x: Math.max(0, adjustedX) });
+    // 设置容器高度以匹配滚动距离
+    const totalScrollDistance = dimensions.width * (items.length - 2);
+    gsap.set(sectionRef.current, {
+      height: totalScrollDistance + viewportHeight,
     });
 
     // 修改 ScrollTrigger 配置
@@ -110,13 +97,10 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
       scrollTrigger: {
         id: "mobile-slider",
         trigger: sectionRef.current,
-        pin: true,
-        pinSpacing: true, // 确保固定时保持间距
+        pin: wrapperRef.current, // 改为固定 wrapper 而不是整个 section
         start: "top top",
-        end: () => `+=${dimensions.width * (items.length - 2)}`,
+        end: () => `bottom-=${viewportHeight}`, // 修改结束位置
         scrub: 1,
-        anticipatePin: 1, // 添加这个属性来优化固定效果
-        pinType: "fixed", // 使用 fixed 定位来防止抖动
       },
     });
 
@@ -128,21 +112,21 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
         x: (i) => {
           const targetX = i * dimensions.width;
           return i + index === items.length - 1
-            ? Math.max(0, targetX)
+            ? Math.max(0, targetX - dimensions.width * 0.2) // 最后一张图片停在略微偏左的位置
             : targetX;
         },
         duration: 1,
         ease: "none",
       });
     });
-  }, [images, dimensions]); // 依赖于 dimensions
+  }, [images, dimensions]);
 
   return (
-    <div
-      ref={sectionRef}
-      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none overflow-hidden"
-    >
-      <div ref={wrapperRef} className="h-full relative">
+    <div ref={sectionRef} className="w-full md:hidden block">
+      <div
+        ref={wrapperRef}
+        className="h-[calc(100vh-130px)] fixed top-0 left-0 w-full touch-none overflow-hidden"
+      >
         <div className="relative h-full">
           {images.map((item, index) => {
             const { title, image, link } = item;

@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
+const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -86,25 +86,41 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
     if (timelineRef.current) timelineRef.current.kill();
     gsap.killTweensOf(items);
 
-    // 设置容器高度以匹配滚动距离
-    const totalScrollDistance = dimensions.width * (items.length - 2);
-    gsap.set(sectionRef.current, {
-      height: totalScrollDistance + viewportHeight,
+    // 获取当前进度并重置位置
+    const currentProgress = timelineRef.current?.progress() || 0;
+    items.forEach((item, index) => {
+      if (index === 0) {
+        gsap.set(item, { x: 0, y: 0 }); // 添加 y: 0 确保垂直位置固定
+        return;
+      }
+      const initialX = dimensions.width * index - dimensions.width * 0.2;
+      const targetX = index * dimensions.width;
+
+      const adjustedX =
+        currentProgress > 0
+          ? initialX - dimensions.width * currentProgress * (items.length - 1)
+          : initialX;
+
+      gsap.set(item, {
+        x: Math.max(0, adjustedX),
+        y: 0, // 添加 y: 0 确保垂直位置固定
+      });
     });
 
-    // 修改 ScrollTrigger 配置
+    // 创建新时间线
     timelineRef.current = gsap.timeline({
       scrollTrigger: {
         id: "mobile-slider",
         trigger: sectionRef.current,
-        pin: wrapperRef.current, // 改为固定 wrapper 而不是整个 section
+        pin: true,
+        pinSpacing: true, // 确保 pin 时保持间距
         start: "top top",
-        end: () => `bottom-=${viewportHeight}`, // 修改结束位置
+        end: () => `+=${dimensions.width * (items.length - 2)}`,
         scrub: 1,
       },
     });
 
-    // 添加动画
+    // 修改动画，确保只在 x 轴方向移动
     items.forEach((_, index) => {
       if (index === 0) return;
       const movingItems = Array.from(items).slice(index);
@@ -112,9 +128,10 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
         x: (i) => {
           const targetX = i * dimensions.width;
           return i + index === items.length - 1
-            ? Math.max(0, targetX - dimensions.width * 0.2) // 最后一张图片停在略微偏左的位置
+            ? Math.max(0, targetX)
             : targetX;
         },
+        y: 0, // 明确设置 y 为 0
         duration: 1,
         ease: "none",
       });
@@ -122,11 +139,11 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
   }, [images, dimensions]);
 
   return (
-    <div ref={sectionRef} className="w-full md:hidden block">
-      <div
-        ref={wrapperRef}
-        className="h-[calc(100vh-130px)] fixed top-0 left-0 w-full touch-none overflow-hidden"
-      >
+    <div
+      ref={sectionRef}
+      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
+    >
+      <div ref={wrapperRef} className="h-full">
         <div className="relative h-full">
           {images.map((item, index) => {
             const { title, image, link } = item;
@@ -162,4 +179,4 @@ const MobileImageSlider = ({ images }: { images: ImageType[] }) => {
   );
 };
 
-export default MobileImageSlider;
+export default ImageSlider;

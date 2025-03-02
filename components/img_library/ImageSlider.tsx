@@ -46,8 +46,12 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
-    // 清除现有动画
-    ScrollTrigger.getAll().forEach((st) => st.kill());
+    // 清除现有动画，但只清除属于该组件的动画
+    ScrollTrigger.getAll().forEach((st) => {
+      if (st.vars.trigger === sectionRef.current) {
+        st.kill();
+      }
+    });
     if (timelineRef.current) timelineRef.current.kill();
     gsap.killTweensOf(items);
 
@@ -69,6 +73,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     // 创建新时间线
     timelineRef.current = gsap.timeline({
       scrollTrigger: {
+        id: "desktop-slider", // 添加唯一标识
         trigger: sectionRef.current,
         pin: true,
         start: "top top+=150px",

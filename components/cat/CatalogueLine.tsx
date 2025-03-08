@@ -16,7 +16,7 @@ const CatalogueLine = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px]",
+        "grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px] fade-in-down",
         isLast && "border-0"
       )}
       key={title}

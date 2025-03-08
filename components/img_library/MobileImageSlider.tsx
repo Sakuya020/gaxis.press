@@ -152,8 +152,8 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
 
           // 设置初始状态
           gsap.set(items[1], {
-            opacity: 0.6,
-            x: initialX + 20, // 从初始位置右侧40px开始
+            opacity: 0.7,
+            x: initialX, // 从初始位置右侧40px开始
             y: 0,
           });
 
@@ -164,7 +164,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
           secondImageTimeline.to(items[1], {
             opacity: 1,
             x: initialX, // 使用与滚动动画相同的初始位置计算
-            duration: 0.4,
+            duration: 0.6,
             ease: "power2.out",
             onComplete: () => {
               // 动画完成后再次确认位置正确
@@ -172,7 +172,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             },
           });
         }
-      }, "+=0.2");
+      }, "+=0.1");
 
       // 为后续加载的图片添加显示逻辑
       const showLaterImages = () => {

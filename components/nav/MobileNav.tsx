@@ -18,7 +18,7 @@ const DesktopNav = () => {
     <>
       <nav
         className={cn(
-          "w-full h-[125px] p-[30px] pb-[10px] border-b border-foreground flex flex-col justify-between md:hidden z-10",
+          "w-full h-[125px] p-[30px] pb-[10px] border-b border-foreground flex flex-col justify-between md:hidden z-10 fade-in-down",
           pathname === "/"
             ? "text-background border-0 fixed top-0 left-0 right-0"
             : "bg-secondaryBackground"

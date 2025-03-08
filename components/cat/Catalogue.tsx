@@ -32,7 +32,7 @@ const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
         <Modal
           modal={modal}
           catalogue={catalogue}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[222px] h-[222px] border border-foreground hidden md:block"
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[222px] h-[222px] border border-foreground hidden md:block"
         />
       )}
     </section>

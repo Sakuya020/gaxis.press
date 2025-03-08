@@ -30,7 +30,7 @@ const DesktopNav = () => {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 h-[150px] p-[30px] pb-[20px] border-b border-foreground bg-background flex-col justify-between z-10 hidden md:flex desktop-nav">
-        <div className="grid grid-cols-12 gap-[10px] w-full">
+        <div className="grid grid-cols-12 gap-[10px] w-full fade-in-down">
           {/* intro */}
           <div className="flex gap-[8px] col-span-7">
             <span className="hidden lg:block text-highlight">G Axis Press</span>

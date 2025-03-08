@@ -17,6 +17,8 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const touchStartRef = useRef(0);
   const scrollStartRef = useRef(0);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const touchTimeRef = useRef(0);
 
   // 初始化尺寸，在屏幕尺寸变化时更新
   useEffect(() => {
@@ -41,33 +43,49 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const handleTouchStart = (e: TouchEvent) => {
       touchStartRef.current = e.touches[0].clientX;
       scrollStartRef.current = window.scrollY;
-      // 防止触摸时页面滚动
-      e.preventDefault();
+      touchTimeRef.current = Date.now();
+      setIsDragging(false);
+      // console.log("Touch start, isDragging:", false); // 调试日志
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!section) return;
 
-      const touchDelta = touchStartRef.current - e.touches[0].clientX;
-      // 将水平滑动距离转换为垂直滚动距离（可以调整系数来控制灵敏度）
-      const scrollY = scrollStartRef.current + touchDelta * 2;
+      const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
+      // 如果移动距离超过阈值，标记为拖动
+      if (touchDelta > 10) {
+        setIsDragging(true);
+        // console.log("Touch move, isDragging set to true, delta:", touchDelta); // 调试日志
+      }
+
+      const scrollDelta = touchStartRef.current - e.touches[0].clientX;
+      const scrollY = scrollStartRef.current + scrollDelta * 2;
 
       window.scrollTo({
         top: scrollY,
-        behavior: "auto", // 使用 'auto' 而不是 'smooth' 以获得更好的响应
+        behavior: "auto",
       });
+    };
 
-      e.preventDefault();
+    const handleTouchEnd = () => {
+      const touchDuration = Date.now() - touchTimeRef.current;
+      // console.log("Touch end, duration:", touchDuration); // 调试日志
+      if (touchDuration < 200) {
+        setIsDragging(false);
+        // console.log("Reset isDragging to false"); // 调试日志
+      }
     };
 
     section.addEventListener("touchstart", handleTouchStart, {
       passive: false,
     });
     section.addEventListener("touchmove", handleTouchMove, { passive: false });
+    section.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       section.removeEventListener("touchstart", handleTouchStart);
       section.removeEventListener("touchmove", handleTouchMove);
+      section.removeEventListener("touchend", handleTouchEnd);
     };
   }, []);
 
@@ -157,8 +175,10 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
                     link && "cursor-pointer",
                     index !== 0 && "border-l"
                   )}
-                  onClick={() => {
-                    if (link) {
+                  onClick={(e) => {
+                    // console.log("Figure clicked, isDragging:", isDragging); // 调试日志
+                    if (!isDragging && link) {
+                      // console.log("Opening link:", link); // 调试日志
                       window.open(link, "_blank");
                     }
                   }}

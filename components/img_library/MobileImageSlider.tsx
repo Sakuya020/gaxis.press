@@ -20,7 +20,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const [isDragging, setIsDragging] = useState(false);
   const touchTimeRef = useRef(0);
   const [imagesLoaded, setImagesLoaded] = useState(0);
-  const [isLastImage, setIsLastImage] = useState(false);
 
   // 初始化尺寸，在屏幕尺寸变化时更新
   useEffect(() => {
@@ -149,6 +148,15 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         start: "top top",
         end: () => `+=${dimensions.width * (items.length - 2)}`,
         scrub: 1,
+        onUpdate: (self) => {
+          // 在接近末尾时锁定垂直位置
+          if (self.progress > 0.95) {
+            gsap.set(wrapperRef.current, {
+              y: 0,
+              force3D: true,
+            });
+          }
+        },
       },
     });
 
@@ -172,9 +180,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             if (borderOpacities[index + i]) {
               const opacity = x < 2 ? 0 : 1;
               borderOpacities[index + i]?.(opacity);
-            }
-            if (x <= 0 && index + i === items.length - 1) {
-              setIsLastImage(true);
             }
           });
         },
@@ -218,36 +223,29 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             if (!image) return null;
             const imgUrl = getImageUrl(image);
             return (
-              <div
-                key={title}
-                className={cn(
-                  "item absolute inset-0 h-full",
-                  isLastImage && "transform-gpu"
-                )}
-                style={
-                  isLastImage
-                    ? {
-                        transform: "translate3d(0, 0, 0)",
-                        position: "fixed",
-                      }
-                    : undefined
-                }
-                onClick={(e) => {
-                  if (!isDragging && link) {
-                    window.open(link, "_blank");
-                  }
-                }}
-              >
-                {index !== 0 && (
-                  <div className="border-element absolute left-0 top-0 h-full border-l border-background z-10" />
-                )}
-                <Image
-                  src={imgUrl}
-                  alt={title}
-                  fill
-                  style={{ objectFit: "cover", aspectRatio: "2247/1500" }}
-                  onLoad={handleImageLoad}
-                />
+              <div key={title} className="item absolute inset-0 h-full">
+                <figure
+                  className={cn(
+                    "relative h-full w-full border-background",
+                    link && "cursor-pointer"
+                  )}
+                  onClick={(e) => {
+                    if (!isDragging && link) {
+                      window.open(link, "_blank");
+                    }
+                  }}
+                >
+                  {index !== 0 && (
+                    <div className="border-element absolute left-0 top-0 h-full border-l border-background z-10" />
+                  )}
+                  <Image
+                    src={imgUrl}
+                    alt={title}
+                    fill
+                    style={{ objectFit: "cover", aspectRatio: "2247/1500" }}
+                    onLoad={handleImageLoad}
+                  />
+                </figure>
               </div>
             );
           })}

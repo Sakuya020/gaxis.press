@@ -41,22 +41,30 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const section = sectionRef.current;
     if (!section) return;
 
+    let lastY = 0;
+    let lastX = 0;
+
     const handleTouchStart = (e: TouchEvent) => {
+      lastY = e.touches[0].clientY;
+      lastX = e.touches[0].clientX;
       touchStartRef.current = e.touches[0].clientX;
       scrollStartRef.current = window.scrollY;
       touchTimeRef.current = Date.now();
       setIsDragging(false);
-      // console.log("Touch start, isDragging:", false); // 调试日志
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      const deltaX = Math.abs(e.touches[0].clientX - lastX);
+      const deltaY = Math.abs(e.touches[0].clientY - lastY);
+
+      // 如果水平移动大于垂直移动，阻止默认行为
+      if (deltaX > deltaY) {
+        e.preventDefault();
+      }
+
       if (!section) return;
 
-      // 阻止默认的滚动行为
-      e.preventDefault();
-
       const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
-      // 如果移动距离超过阈值，标记为拖动
       if (touchDelta > 10) {
         setIsDragging(true);
       }
@@ -64,36 +72,45 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       const scrollDelta = touchStartRef.current - e.touches[0].clientX;
       const scrollY = scrollStartRef.current + scrollDelta * 2;
 
-      // 添加边界检查，防止过度滚动
-      const maxScroll =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const targetScrollY = Math.max(0, Math.min(scrollY, maxScroll));
-
       window.scrollTo({
-        top: targetScrollY,
+        top: scrollY,
         behavior: "auto",
       });
+
+      lastY = e.touches[0].clientY;
+      lastX = e.touches[0].clientX;
     };
 
     const handleTouchEnd = () => {
       const touchDuration = Date.now() - touchTimeRef.current;
-      // console.log("Touch end, duration:", touchDuration); // 调试日志
       if (touchDuration < 200) {
         setIsDragging(false);
-        // console.log("Reset isDragging to false"); // 调试日志
       }
     };
 
-    section.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
+    // 阻止整个页面的默认滚动行为
+    const preventScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (section.contains(target)) {
+        e.preventDefault();
+      }
+    };
+
+    // 添加事件监听器
+    section.addEventListener("touchstart", handleTouchStart, { passive: true });
     section.addEventListener("touchmove", handleTouchMove, { passive: false });
     section.addEventListener("touchend", handleTouchEnd);
+
+    // 添加全局触摸事件监听器
+    document.body.addEventListener("touchmove", preventScroll, {
+      passive: false,
+    });
 
     return () => {
       section.removeEventListener("touchstart", handleTouchStart);
       section.removeEventListener("touchmove", handleTouchMove);
       section.removeEventListener("touchend", handleTouchEnd);
+      document.body.removeEventListener("touchmove", preventScroll);
     };
   }, []);
 
@@ -212,7 +229,8 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   return (
     <div
       ref={sectionRef}
-      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none overscroll-none"
+      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
+      style={{ touchAction: "none" }}
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">

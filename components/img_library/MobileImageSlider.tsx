@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { cn, getImageUrl } from "@/lib/utils";
 import { ImageType } from "@/lib/types";
@@ -20,17 +20,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const [isDragging, setIsDragging] = useState(false);
   const touchTimeRef = useRef(0);
   const [imagesLoaded, setImagesLoaded] = useState(0);
-  const [currentGroup, setCurrentGroup] = useState(0);
-  const totalGroups = 3;
-
-  // 创建循环图片数组
-  const loopedImages = useMemo(() => {
-    const result = [];
-    for (let i = 0; i < totalGroups; i++) {
-      result.push(...images);
-    }
-    return result;
-  }, [images]);
 
   // 初始化尺寸，在屏幕尺寸变化时更新
   useEffect(() => {
@@ -52,32 +41,22 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const section = sectionRef.current;
     if (!section) return;
 
-    let lastY = 0;
-    let lastX = 0;
-
     const handleTouchStart = (e: TouchEvent) => {
-      lastY = e.touches[0].clientY;
-      lastX = e.touches[0].clientX;
       touchStartRef.current = e.touches[0].clientX;
       scrollStartRef.current = window.scrollY;
       touchTimeRef.current = Date.now();
       setIsDragging(false);
+      // console.log("Touch start, isDragging:", false); // 调试日志
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      const deltaX = Math.abs(e.touches[0].clientX - lastX);
-      const deltaY = Math.abs(e.touches[0].clientY - lastY);
-
-      // 如果水平移动大于垂直移动，阻止默认行为
-      if (deltaX > deltaY) {
-        e.preventDefault();
-      }
-
       if (!section) return;
 
       const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
+      // 如果移动距离超过阈值，标记为拖动
       if (touchDelta > 10) {
         setIsDragging(true);
+        // console.log("Touch move, isDragging set to true, delta:", touchDelta); // 调试日志
       }
 
       const scrollDelta = touchStartRef.current - e.touches[0].clientX;
@@ -87,41 +66,27 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         top: scrollY,
         behavior: "auto",
       });
-
-      lastY = e.touches[0].clientY;
-      lastX = e.touches[0].clientX;
     };
 
     const handleTouchEnd = () => {
       const touchDuration = Date.now() - touchTimeRef.current;
+      // console.log("Touch end, duration:", touchDuration); // 调试日志
       if (touchDuration < 200) {
         setIsDragging(false);
+        // console.log("Reset isDragging to false"); // 调试日志
       }
     };
 
-    // 阻止整个页面的默认滚动行为
-    const preventScroll = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      if (section.contains(target)) {
-        e.preventDefault();
-      }
-    };
-
-    // 添加事件监听器
-    section.addEventListener("touchstart", handleTouchStart, { passive: true });
-    section.addEventListener("touchmove", handleTouchMove, { passive: false });
-    section.addEventListener("touchend", handleTouchEnd);
-
-    // 添加全局触摸事件监听器
-    document.body.addEventListener("touchmove", preventScroll, {
+    section.addEventListener("touchstart", handleTouchStart, {
       passive: false,
     });
+    section.addEventListener("touchmove", handleTouchMove, { passive: false });
+    section.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       section.removeEventListener("touchstart", handleTouchStart);
       section.removeEventListener("touchmove", handleTouchMove);
       section.removeEventListener("touchend", handleTouchEnd);
-      document.body.removeEventListener("touchmove", preventScroll);
     };
   }, []);
 
@@ -129,7 +94,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     if (!sectionRef.current || !wrapperRef.current) return;
 
     const items = wrapperRef.current.querySelectorAll(".item");
-    const originalLength = images.length;
 
     // 为每个图片创建 opacity quickTo 实例
     const borderOpacities = Array.from(items).map((item) => {
@@ -156,33 +120,21 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     // 获取当前进度并重置位置
     const currentProgress = timelineRef.current?.progress() || 0;
     items.forEach((item, index) => {
-      const groupIndex = Math.floor(index / originalLength);
-      const itemIndex = index % originalLength;
-
-      if (itemIndex === 0) {
-        gsap.set(item, {
-          x: dimensions.width * originalLength * groupIndex,
-          y: 0,
-        });
+      if (index === 0) {
+        gsap.set(item, { x: 0, y: 0 }); // 添加 y: 0 确保垂直位置固定
         return;
       }
-
-      const initialX =
-        dimensions.width * itemIndex -
-        dimensions.width * 0.2 +
-        dimensions.width * originalLength * groupIndex;
-      const targetX =
-        itemIndex * dimensions.width +
-        dimensions.width * originalLength * groupIndex;
+      const initialX = dimensions.width * index - dimensions.width * 0.2;
+      const targetX = index * dimensions.width;
 
       const adjustedX =
         currentProgress > 0
-          ? initialX - dimensions.width * currentProgress * (originalLength - 1)
+          ? initialX - dimensions.width * currentProgress * (items.length - 1)
           : initialX;
 
       gsap.set(item, {
-        x: Math.max(dimensions.width * originalLength * groupIndex, adjustedX),
-        y: 0,
+        x: Math.max(0, adjustedX),
+        y: 0, // 添加 y: 0 确保垂直位置固定
       });
     });
 
@@ -192,65 +144,41 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         id: "mobile-slider",
         trigger: sectionRef.current,
         pin: true,
-        pinSpacing: true,
+        pinSpacing: true, // 确保 pin 时保持间距
         start: "top top",
-        end: () => `+=${dimensions.width * (originalLength - 2)}`,
+        end: () => `+=${dimensions.width * (items.length - 2)}`,
         scrub: 1,
-        onUpdate: (self) => {
-          // 当滚动到末尾时，切换到下一组
-          if (self.progress >= 0.99) {
-            setCurrentGroup((prev) => (prev + 1) % totalGroups);
-            ScrollTrigger.getById("mobile-slider")?.scroll(0);
-          }
-        },
       },
     });
 
     // 修改动画，在移动时更新边框透明度
     items.forEach((_, index) => {
-      if (index % originalLength === 0) return;
-      const groupStartIndex =
-        Math.floor(index / originalLength) * originalLength;
-      const movingItems = Array.from(items).slice(
-        groupStartIndex + (index % originalLength),
-        groupStartIndex + originalLength
-      );
-
+      if (index === 0) return;
+      const movingItems = Array.from(items).slice(index);
       timelineRef.current?.to(movingItems, {
         x: (i) => {
-          const baseX =
-            dimensions.width *
-            originalLength *
-            Math.floor(index / originalLength);
-          const targetX = (i - groupStartIndex) * dimensions.width + baseX;
-          return i - groupStartIndex + (index % originalLength) ===
-            originalLength - 1
-            ? Math.max(baseX, targetX)
+          const targetX = i * dimensions.width;
+          return i + index === items.length - 1
+            ? Math.max(0, targetX)
             : targetX;
         },
-        y: 0,
+        y: 0, // 保持垂直位置为0
+        immediateRender: true, // 立即渲染初始状态
         duration: 1,
         ease: "none",
+        overwrite: "auto", // 确保动画不会堆叠
         onUpdate: function () {
           movingItems.forEach((item, i) => {
             const x = gsap.getProperty(item, "x") as number;
-            const opacityIndex = groupStartIndex + i;
-            if (borderOpacities[opacityIndex]) {
-              const opacity =
-                x <
-                dimensions.width *
-                  originalLength *
-                  Math.floor(index / originalLength) +
-                  2
-                  ? 0
-                  : 1;
-              borderOpacities[opacityIndex]?.(opacity);
+            if (borderOpacities[index + i]) {
+              const opacity = x < 2 ? 0 : 1;
+              borderOpacities[index + i]?.(opacity);
             }
           });
         },
       });
     });
-  }, [images, dimensions, currentGroup]);
+  }, [images, dimensions]);
 
   // 添加图片加载计数器
   const handleImageLoad = () => {
@@ -280,19 +208,15 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     <div
       ref={sectionRef}
       className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
-      style={{ touchAction: "none" }}
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">
-          {loopedImages.map((item, index) => {
+          {images.map((item, index) => {
             const { title, image, link } = item;
             if (!image) return null;
             const imgUrl = getImageUrl(image);
             return (
-              <div
-                key={`${title}-${index}`}
-                className="item absolute inset-0 h-full"
-              >
+              <div key={title} className="item absolute inset-0 h-full">
                 <figure
                   className={cn(
                     "relative h-full w-full border-background",

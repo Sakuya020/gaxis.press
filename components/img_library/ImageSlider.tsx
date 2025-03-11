@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { cn, getImageUrl } from "@/lib/utils";
 import { ImageType } from "@/lib/types";
@@ -16,122 +16,137 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [initialImagesLoaded, setInitialImagesLoaded] = useState(false);
-  const loadedImagesCount = useRef(0);
   const setCurrentImage = useCurrentImageStore(
     (state) => state.setCurrentImage
   );
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
-  useEffect(() => {
-    setCurrentImage(images[0]);
+  // 添加防抖函数
+  const debounceResize = useCallback(() => {
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
+    }
 
-    const updateDimensions = () => {
+    resizeTimeoutRef.current = setTimeout(() => {
       setDimensions({
         width: window.innerWidth,
         height: window.innerHeight,
       });
-    };
+
+      // 重置组件状态
+      setImagesLoaded(false);
+
+      // 清除所有现有的 ScrollTrigger 实例
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+
+      // 清除现有的时间线
+      if (timelineRef.current) {
+        timelineRef.current.kill();
+        timelineRef.current = null;
+      }
+    }, 250);
+  }, []);
+
+  useEffect(() => {
+    setCurrentImage(images[0]);
 
     // 初始化尺寸
-    updateDimensions();
+    setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
 
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, [images]);
-
-  // 处理图片加载
-  const handleImageLoad = (index: number) => {
-    loadedImagesCount.current += 1;
-
-    // 只要前两张图片加载完成就开始动画
-    if (loadedImagesCount.current >= Math.min(2, images.length)) {
-      setInitialImagesLoaded(true);
-    }
-  };
+    window.addEventListener("resize", debounceResize);
+    return () => {
+      window.removeEventListener("resize", debounceResize);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
+  }, [images, debounceResize]);
 
   useGSAP(() => {
-    if (!sectionRef.current || !wrapperRef.current || !initialImagesLoaded)
-      return;
+    if (!sectionRef.current || !wrapperRef.current) return;
 
+    const wrapper = wrapperRef.current.querySelector(
+      ".relative"
+    ) as HTMLElement;
     const items = wrapperRef.current.querySelectorAll(".item");
     const viewportHeight = dimensions.height - 150;
     const slideWidth = (viewportHeight * 2247) / 1500;
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
-    // 清除现有动画，但只清除属于该组件的动画
-    ScrollTrigger.getAll().forEach((st) => {
-      if (st.vars.trigger === sectionRef.current) {
-        st.kill();
-      }
-    });
-    if (timelineRef.current) timelineRef.current.kill();
-    gsap.killTweensOf(items);
-
-    // 设置初始状态：所有图片透明度为0，向右偏移20px
-    items.forEach((item, index) => {
-      if (index === 0) {
-        gsap.set(item, { opacity: 0, x: 20 });
-      } else {
-        gsap.set(item, {
-          opacity: 0,
-          x: index * slideWidth + 20,
-        });
-      }
+    // 初始化：确保内容完全隐藏
+    gsap.set(wrapper, {
+      autoAlpha: 0,
+      x: 20,
+      visibility: "hidden",
     });
 
-    // 创建入场动画
-    const entranceTimeline = gsap.timeline();
-
-    // 首先显示第一张图片
-    entranceTimeline.to(items[0], {
-      opacity: 1,
-      x: 0,
-      duration: 0.8,
-      ease: "power2.out",
+    // 设置每个图片的初始位置（相对位置）
+    gsap.set(items, {
+      x: (i) => (i === 0 ? 0 : i * slideWidth),
     });
 
-    // 然后显示其他图片（已加载的）
-    for (
-      let i = 1;
-      i < Math.min(loadedImagesCount.current, items.length);
-      i++
-    ) {
-      entranceTimeline.to(
-        items[i],
-        {
-          opacity: 1,
-          x: i * slideWidth,
-          duration: 0.5,
-          ease: "power2.out",
-        },
-        "-=0.3" // 稍微重叠动画
-      );
-    }
+    // 为每个图片创建 opacity quickTo 实例
+    const borderOpacities = Array.from(items).map((item) => {
+      const border = item.querySelector(".border-l-element") as HTMLElement;
+      return gsap.quickTo(border, "opacity", {
+        duration: 0.1,
+        ease: "none",
+      });
+    });
 
-    // 为后续加载的图片添加显示逻辑
-    const showLaterImages = () => {
-      const loadedCount = loadedImagesCount.current;
-      if (loadedCount > 2) {
-        for (let i = 2; i < loadedCount; i++) {
-          if (items[i] && gsap.getProperty(items[i], "opacity") === 0) {
-            gsap.to(items[i], {
-              opacity: 1,
-              x: i * slideWidth,
-              duration: 0.5,
-              ease: "power2.out",
-            });
+    // 修改预加载图片的逻辑
+    const preloadImages = async () => {
+      const imagesToLoad = Array.from(items).slice(0, 2);
+      const loadPromises = imagesToLoad.map((item) => {
+        return new Promise((resolve) => {
+          const img = item.querySelector("img");
+          if (img?.complete) {
+            resolve(true);
+          } else {
+            img?.addEventListener("load", () => resolve(true));
           }
-        }
-      }
+        });
+      });
+
+      await Promise.all(loadPromises);
+
+      // 创建显示序列
+      const showSequence = gsap.timeline({
+        onStart: () => {
+          gsap.set(wrapper, { visibility: "visible" });
+          setImagesLoaded(true);
+        },
+      });
+
+      // 执行入场动画
+      showSequence.to(wrapper, {
+        autoAlpha: 1,
+        x: 0,
+        duration: 1,
+        ease: "power2.out",
+        onComplete: () => {
+          createScrollAnimation();
+        },
+      });
     };
 
-    // 定期检查是否有新图片加载完成
-    const checkInterval = setInterval(showLaterImages, 200);
+    preloadImages();
 
-    // 入场动画完成后设置滚动动画
-    entranceTimeline.call(() => {
-      // 创建新时间线
+    // 滚动动画创建函数
+    const createScrollAnimation = () => {
+      // 清除现有动画
+      ScrollTrigger.getAll().forEach((st) => {
+        if (st.vars.trigger === sectionRef.current) {
+          st.kill();
+        }
+      });
+      if (timelineRef.current) timelineRef.current.kill();
+
       timelineRef.current = gsap.timeline({
         scrollTrigger: {
           id: "desktop-slider",
@@ -143,6 +158,13 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
           onUpdate: (self) => {
             items.forEach((item, index) => {
               const x = gsap.getProperty(item, "x") as number;
+
+              // 使用 quickTo 来平滑处理边框颜色
+              if (borderOpacities[index]) {
+                const opacity = x < 2 ? 0 : 1;
+                borderOpacities[index](opacity);
+              }
+
               if (x < triggerPoint && x > 0) {
                 setCurrentImage(images[index]);
               }
@@ -169,49 +191,32 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
           ease: "none",
         });
       });
-    });
-
-    return () => {
-      clearInterval(checkInterval);
     };
-  }, [images, dimensions, initialImagesLoaded]);
+  }, [images, dimensions]);
 
   return (
     <div
       ref={sectionRef}
-      className="w-full h-[calc(100vh-150px)] hidden md:block"
+      className="w-full h-[calc(100vh-150px)] hidden md:block overflow-hidden"
     >
       <div ref={wrapperRef} className="h-full">
-        <div className="relative h-full">
+        <div className="relative h-full opacity-0 invisible">
           {images.map((item, index) => {
             const { title, image, link } = item;
             if (!image) return null;
             const imgUrl = getImageUrl(image);
             return (
-              <div
-                key={title}
-                className="item absolute inset-0 h-full"
-                style={{ opacity: 0 }} // 初始设置为不可见
-              >
+              <div key={title} className="item absolute inset-0 h-full">
                 <figure
                   className={cn(
-                    "relative h-full aspect-[2247/1500] border-background",
-                    link && "cursor-pointer",
-                    index !== 0 && "border-l"
+                    "relative h-full aspect-[2247/1500]",
+                    link && "cursor-pointer"
                   )}
-                  onClick={() => {
-                    if (link) {
-                      window.open(link, "_blank");
-                    }
-                  }}
                 >
-                  <Image
-                    src={imgUrl}
-                    alt={title}
-                    fill
-                    onLoad={() => handleImageLoad(index)}
-                    priority={index < 2} // 优先加载前两张图片
-                  />
+                  {index !== 0 && (
+                    <div className="border-l-element absolute left-0 top-0 h-full border-l border-background z-10" />
+                  )}
+                  <Image src={imgUrl} alt={title} fill />
                 </figure>
               </div>
             );

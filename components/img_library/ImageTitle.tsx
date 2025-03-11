@@ -13,6 +13,9 @@ const ImageTitle = () => {
     const titleElement = document.querySelector(".scrolling-title");
     if (!titleElement) return;
 
+    // 先重置滚动位置
+    titleElement.scrollLeft = 0;
+
     // 计算文本是否溢出
     const isOverflowing = titleElement.scrollWidth > titleElement.clientWidth;
 
@@ -27,16 +30,27 @@ const ImageTitle = () => {
         scrollLeft: scrollDistance,
       });
 
+      const handleEnter = () => tl.play();
+      const handleLeave = () => tl.reverse();
+
       // 添加鼠标事件监听
-      titleElement.addEventListener("mouseenter", () => tl.play());
-      titleElement.addEventListener("mouseleave", () => tl.reverse());
+      titleElement.addEventListener("mouseenter", handleEnter);
+      titleElement.addEventListener("mouseleave", handleLeave);
+
+      // 清理函数
+      return () => {
+        titleElement.removeEventListener("mouseenter", handleEnter);
+        titleElement.removeEventListener("mouseleave", handleLeave);
+        // 确保在组件更新时重置滚动位置
+        titleElement.scrollLeft = 0;
+      };
     }
-  }, [currentImage]); // 当图片改变时重新运行
+  }, [currentImage]);
 
   return (
     <div className="flex items-center gap-[1rem] w-full">
       <p className="w-fit font-sans text-start rotate-90">↑</p>
-      <p className="scrolling-title overflow-x-hidden whitespace-nowrap">
+      <p className="scrolling-title overflow-hidden text-ellipsis whitespace-nowrap hover:overflow-x-hidden hover:text-clip">
         {currentImage?.title}
       </p>
     </div>

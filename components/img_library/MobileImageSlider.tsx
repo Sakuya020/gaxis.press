@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { cn, getImageUrl } from "@/lib/utils";
 import { ImageType } from "@/lib/types";
@@ -20,6 +20,17 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const [isDragging, setIsDragging] = useState(false);
   const touchTimeRef = useRef(0);
   const [imagesLoaded, setImagesLoaded] = useState(0);
+  const [currentGroup, setCurrentGroup] = useState(0);
+  const totalGroups = 3;
+
+  // 创建循环图片数组
+  const loopedImages = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < totalGroups; i++) {
+      result.push(...images);
+    }
+    return result;
+  }, [images]);
 
   // 初始化尺寸，在屏幕尺寸变化时更新
   useEffect(() => {
@@ -118,6 +129,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     if (!sectionRef.current || !wrapperRef.current) return;
 
     const items = wrapperRef.current.querySelectorAll(".item");
+    const originalLength = images.length;
 
     // 为每个图片创建 opacity quickTo 实例
     const borderOpacities = Array.from(items).map((item) => {
@@ -144,21 +156,33 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     // 获取当前进度并重置位置
     const currentProgress = timelineRef.current?.progress() || 0;
     items.forEach((item, index) => {
-      if (index === 0) {
-        gsap.set(item, { x: 0, y: 0 }); // 添加 y: 0 确保垂直位置固定
+      const groupIndex = Math.floor(index / originalLength);
+      const itemIndex = index % originalLength;
+
+      if (itemIndex === 0) {
+        gsap.set(item, {
+          x: dimensions.width * originalLength * groupIndex,
+          y: 0,
+        });
         return;
       }
-      const initialX = dimensions.width * index - dimensions.width * 0.2;
-      const targetX = index * dimensions.width;
+
+      const initialX =
+        dimensions.width * itemIndex -
+        dimensions.width * 0.2 +
+        dimensions.width * originalLength * groupIndex;
+      const targetX =
+        itemIndex * dimensions.width +
+        dimensions.width * originalLength * groupIndex;
 
       const adjustedX =
         currentProgress > 0
-          ? initialX - dimensions.width * currentProgress * (items.length - 1)
+          ? initialX - dimensions.width * currentProgress * (originalLength - 1)
           : initialX;
 
       gsap.set(item, {
-        x: Math.max(0, adjustedX),
-        y: 0, // 添加 y: 0 确保垂直位置固定
+        x: Math.max(dimensions.width * originalLength * groupIndex, adjustedX),
+        y: 0,
       });
     });
 
@@ -168,22 +192,40 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         id: "mobile-slider",
         trigger: sectionRef.current,
         pin: true,
-        pinSpacing: true, // 确保 pin 时保持间距
+        pinSpacing: true,
         start: "top top",
-        end: () => `+=${dimensions.width * (items.length - 2)}`,
+        end: () => `+=${dimensions.width * (originalLength - 2)}`,
         scrub: 1,
+        onUpdate: (self) => {
+          // 当滚动到末尾时，切换到下一组
+          if (self.progress >= 0.99) {
+            setCurrentGroup((prev) => (prev + 1) % totalGroups);
+            ScrollTrigger.getById("mobile-slider")?.scroll(0);
+          }
+        },
       },
     });
 
     // 修改动画，在移动时更新边框透明度
     items.forEach((_, index) => {
-      if (index === 0) return;
-      const movingItems = Array.from(items).slice(index);
+      if (index % originalLength === 0) return;
+      const groupStartIndex =
+        Math.floor(index / originalLength) * originalLength;
+      const movingItems = Array.from(items).slice(
+        groupStartIndex + (index % originalLength),
+        groupStartIndex + originalLength
+      );
+
       timelineRef.current?.to(movingItems, {
         x: (i) => {
-          const targetX = i * dimensions.width;
-          return i + index === items.length - 1
-            ? Math.max(0, targetX)
+          const baseX =
+            dimensions.width *
+            originalLength *
+            Math.floor(index / originalLength);
+          const targetX = (i - groupStartIndex) * dimensions.width + baseX;
+          return i - groupStartIndex + (index % originalLength) ===
+            originalLength - 1
+            ? Math.max(baseX, targetX)
             : targetX;
         },
         y: 0,
@@ -192,15 +234,23 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         onUpdate: function () {
           movingItems.forEach((item, i) => {
             const x = gsap.getProperty(item, "x") as number;
-            if (borderOpacities[index + i]) {
-              const opacity = x < 2 ? 0 : 1;
-              borderOpacities[index + i]?.(opacity);
+            const opacityIndex = groupStartIndex + i;
+            if (borderOpacities[opacityIndex]) {
+              const opacity =
+                x <
+                dimensions.width *
+                  originalLength *
+                  Math.floor(index / originalLength) +
+                  2
+                  ? 0
+                  : 1;
+              borderOpacities[opacityIndex]?.(opacity);
             }
           });
         },
       });
     });
-  }, [images, dimensions]);
+  }, [images, dimensions, currentGroup]);
 
   // 添加图片加载计数器
   const handleImageLoad = () => {
@@ -234,12 +284,15 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">
-          {images.map((item, index) => {
+          {loopedImages.map((item, index) => {
             const { title, image, link } = item;
             if (!image) return null;
             const imgUrl = getImageUrl(image);
             return (
-              <div key={title} className="item absolute inset-0 h-full">
+              <div
+                key={`${title}-${index}`}
+                className="item absolute inset-0 h-full"
+              >
                 <figure
                   className={cn(
                     "relative h-full w-full border-background",

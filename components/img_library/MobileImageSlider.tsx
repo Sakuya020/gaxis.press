@@ -207,7 +207,13 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   return (
     <div
       ref={sectionRef}
-      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
+      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none overflow-hidden"
+      style={{
+        transform: "translate3d(0, 0, 0)", // 强制硬件加速
+        willChange: "transform", // 优化性能
+        position: "relative",
+        touchAction: "pan-x", // 只允许水平方向的触摸操作
+      }}
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">

@@ -5,10 +5,12 @@ const CatalogueLine = ({
   item,
   isLast,
   setModal,
+  order,
 }: {
   item: CatalogueType;
   isLast: boolean;
   setModal: (modal: { active: boolean; no: number }) => void;
+  order: "asc" | "desc";
 }) => {
   const { title, status, date, no, availableAt, collectionAt } = item;
   const formattedDate = formatDate(date);
@@ -19,7 +21,7 @@ const CatalogueLine = ({
         "grid grid-cols-6 md:grid-cols-12 md:gap-[10px] border-b border-secondary px-[30px] fade-in-down",
         isLast && "border-0"
       )}
-      key={title}
+      key={`${no}-${order}`}
     >
       {/* No. */}
       <div className="col-span-1 py-[10px] md:py-[20px]">No.{no}</div>

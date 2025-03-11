@@ -25,6 +25,7 @@ const Catalogue = ({ catalogue }: { catalogue: CatalogueType[] }) => {
             item={item}
             setModal={setModal}
             isLast={index === sortedCatalogue.length - 1}
+            order={order}
           />
         );
       })}

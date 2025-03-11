@@ -52,19 +52,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       if (!section) return;
 
       const touchDelta = touchStartRef.current - e.touches[0].clientX;
-
-      // 只在最后一张图片时检查并减速
-      const totalScroll = dimensions.width * (images.length - 2); // 总滚动距离
-      const progress = window.scrollY / totalScroll; // 当前进度 0-1
-
-      let scrollDelta = touchDelta * 2; // 保持原来的倍数
-
-      // 只在最后10%的距离时减速
-      if (progress > 0.9) {
-        const slowdownFactor = Math.max(0.2, 1 - (progress - 0.9) * 10);
-        scrollDelta *= slowdownFactor;
-      }
-
+      const scrollDelta = touchDelta * 2;
       const scrollY = scrollStartRef.current + scrollDelta;
 
       window.scrollTo({
@@ -93,7 +81,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       section.removeEventListener("touchmove", handleTouchMove);
       section.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [dimensions.width, images.length]);
+  }, []);
 
   useGSAP(() => {
     if (!sectionRef.current || !wrapperRef.current) return;
@@ -143,20 +131,27 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       });
     });
 
-    // 创建新时间线
+    // 修改时间线配置
     timelineRef.current = gsap.timeline({
       scrollTrigger: {
         id: "mobile-slider",
         trigger: sectionRef.current,
         pin: true,
-        pinSpacing: true, // 确保 pin 时保持间距
+        pinSpacing: true,
         start: "top top",
         end: () => `+=${dimensions.width * (items.length - 2)}`,
         scrub: 1,
+        // 添加这些配置来控制垂直方向的行为
+        preventOverlaps: true,
+        fastScrollEnd: true,
+        onUpdate: (self) => {
+          // 强制保持垂直位置
+          gsap.set(items, { y: 0, force3D: true });
+        },
       },
     });
 
-    // 修改动画，在移动时更新边框透明度
+    // 修改动画设置
     items.forEach((_, index) => {
       if (index === 0) return;
       const movingItems = Array.from(items).slice(index);
@@ -167,12 +162,17 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             ? Math.max(0, targetX)
             : targetX;
         },
-        y: 0,
+        y: 0, // 确保 y 值始终为 0
         duration: 1,
         ease: "none",
+        // 添加 force3D 和 overwrite 配置
+        force3D: true,
+        overwrite: "auto",
         onUpdate: function () {
           movingItems.forEach((item, i) => {
             const x = gsap.getProperty(item, "x") as number;
+            // 在这里也强制设置 y 值
+            gsap.set(item, { y: 0, force3D: true });
             if (borderOpacities[index + i]) {
               const opacity = x < 2 ? 0 : 1;
               borderOpacities[index + i]?.(opacity);

@@ -52,18 +52,25 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const handleTouchMove = (e: TouchEvent) => {
       if (!section) return;
 
+      // 阻止默认的滚动行为
+      e.preventDefault();
+
       const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
       // 如果移动距离超过阈值，标记为拖动
       if (touchDelta > 10) {
         setIsDragging(true);
-        // console.log("Touch move, isDragging set to true, delta:", touchDelta); // 调试日志
       }
 
       const scrollDelta = touchStartRef.current - e.touches[0].clientX;
       const scrollY = scrollStartRef.current + scrollDelta * 2;
 
+      // 添加边界检查，防止过度滚动
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const targetScrollY = Math.max(0, Math.min(scrollY, maxScroll));
+
       window.scrollTo({
-        top: scrollY,
+        top: targetScrollY,
         behavior: "auto",
       });
     };
@@ -205,7 +212,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   return (
     <div
       ref={sectionRef}
-      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
+      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none overscroll-none"
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">

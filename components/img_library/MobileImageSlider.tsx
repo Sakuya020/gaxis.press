@@ -46,40 +46,45 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       scrollStartRef.current = window.scrollY;
       touchTimeRef.current = Date.now();
       setIsDragging(false);
-      // console.log("Touch start, isDragging:", false); // 调试日志
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!section) return;
 
-      const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
-      // 如果移动距离超过阈值，标记为拖动
-      if (touchDelta > 10) {
-        setIsDragging(true);
-        // console.log("Touch move, isDragging set to true, delta:", touchDelta); // 调试日志
+      const touchDelta = touchStartRef.current - e.touches[0].clientX;
+
+      // 只在最后一张图片时检查并减速
+      const totalScroll = dimensions.width * (images.length - 2); // 总滚动距离
+      const progress = window.scrollY / totalScroll; // 当前进度 0-1
+
+      let scrollDelta = touchDelta * 2; // 保持原来的倍数
+
+      // 只在最后10%的距离时减速
+      if (progress > 0.9) {
+        const slowdownFactor = Math.max(0.2, 1 - (progress - 0.9) * 10);
+        scrollDelta *= slowdownFactor;
       }
 
-      const scrollDelta = touchStartRef.current - e.touches[0].clientX;
-      const scrollY = scrollStartRef.current + scrollDelta * 2;
+      const scrollY = scrollStartRef.current + scrollDelta;
 
       window.scrollTo({
         top: scrollY,
         behavior: "auto",
       });
+
+      if (Math.abs(touchDelta) > 10) {
+        setIsDragging(true);
+      }
     };
 
     const handleTouchEnd = () => {
       const touchDuration = Date.now() - touchTimeRef.current;
-      // console.log("Touch end, duration:", touchDuration); // 调试日志
       if (touchDuration < 200) {
         setIsDragging(false);
-        // console.log("Reset isDragging to false"); // 调试日志
       }
     };
 
-    section.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
-    });
+    section.addEventListener("touchstart", handleTouchStart, { passive: true });
     section.addEventListener("touchmove", handleTouchMove, { passive: false });
     section.addEventListener("touchend", handleTouchEnd);
 
@@ -88,7 +93,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       section.removeEventListener("touchmove", handleTouchMove);
       section.removeEventListener("touchend", handleTouchEnd);
     };
-  }, []);
+  }, [dimensions.width, images.length]);
 
   useGSAP(() => {
     if (!sectionRef.current || !wrapperRef.current) return;
@@ -206,10 +211,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     <div
       ref={sectionRef}
       className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
-      style={{
-        overscrollBehavior: "none",
-        WebkitOverflowScrolling: "touch", // 在 iOS 上提供更流畅的滚动
-      }}
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">

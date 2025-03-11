@@ -148,15 +148,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         start: "top top",
         end: () => `+=${dimensions.width * (items.length - 2)}`,
         scrub: 1,
-        onUpdate: (self) => {
-          // 在接近末尾时锁定垂直位置
-          if (self.progress > 0.95) {
-            gsap.set(wrapperRef.current, {
-              y: 0,
-              force3D: true,
-            });
-          }
-        },
       },
     });
 
@@ -215,6 +206,10 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     <div
       ref={sectionRef}
       className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
+      style={{
+        overscrollBehavior: "none",
+        WebkitOverflowScrolling: "touch", // 在 iOS 上提供更流畅的滚动
+      }}
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">

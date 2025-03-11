@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-const ImageSlider = ({ images }: { images: ImageType[] }) => {
+const BaseImageSlider = ({ images }: { images: ImageType[] }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
@@ -240,6 +240,8 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
                     fill
                     style={{ objectFit: "cover", aspectRatio: "2247/1500" }}
                     onLoad={handleImageLoad}
+                    loading={index < 2 ? "eager" : "lazy"}
+                    sizes="100vw"
                   />
                 </figure>
               </div>
@@ -251,4 +253,29 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   );
 };
 
-export default ImageSlider;
+// 修改 RepeatedImageSlider 组件
+const RepeatedImageSlider = ({ images }: { images: ImageType[] }) => {
+  const [repeatedImages, setRepeatedImages] = useState<ImageType[]>([]);
+
+  useEffect(() => {
+    const repeatedArray: ImageType[] = [];
+    // 重复3次
+    for (let i = 0; i < 5; i++) {
+      images.forEach((img, index) => {
+        repeatedArray.push({
+          ...img,
+          title: `${img.title}-${i}-${index}`,
+        });
+      });
+    }
+    setRepeatedImages(repeatedArray);
+  }, [images]);
+
+  if (repeatedImages.length === 0) {
+    return null;
+  }
+
+  return <BaseImageSlider images={repeatedImages} />;
+};
+
+export default RepeatedImageSlider;

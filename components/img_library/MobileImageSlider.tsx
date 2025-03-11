@@ -50,9 +50,16 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // 阻止默认滚动行为
+
       if (!section) return;
 
       const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
+      const touchY = Math.abs(e.touches[0].clientY - e.touches[0].clientY);
+
+      // 如果垂直移动大于水平移动，则不处理
+      if (touchY > touchDelta) return;
+
       // 如果移动距离超过阈值，标记为拖动
       if (touchDelta > 10) {
         setIsDragging(true);
@@ -80,7 +87,10 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     section.addEventListener("touchstart", handleTouchStart, {
       passive: false,
     });
-    section.addEventListener("touchmove", handleTouchMove, { passive: false });
+    section.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+      capture: true, // 在捕获阶段处理事件
+    });
     section.addEventListener("touchend", handleTouchEnd);
 
     return () => {
@@ -162,11 +172,9 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             ? Math.max(0, targetX)
             : targetX;
         },
-        y: 0, // 保持垂直位置为0
-        immediateRender: true, // 立即渲染初始状态
+        y: 0,
         duration: 1,
         ease: "none",
-        overwrite: "auto", // 确保动画不会堆叠
         onUpdate: function () {
           movingItems.forEach((item, i) => {
             const x = gsap.getProperty(item, "x") as number;
@@ -207,13 +215,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   return (
     <div
       ref={sectionRef}
-      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none overflow-hidden"
-      style={{
-        transform: "translate3d(0, 0, 0)", // 强制硬件加速
-        willChange: "transform", // 优化性能
-        position: "relative",
-        touchAction: "pan-x", // 只允许水平方向的触摸操作
-      }}
+      className="w-full h-[calc(100vh-130px)] md:hidden block touch-none"
     >
       <div ref={wrapperRef} className="h-full opacity-0">
         <div className="relative h-full">

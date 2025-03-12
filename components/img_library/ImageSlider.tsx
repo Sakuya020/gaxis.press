@@ -22,7 +22,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // 添加防抖函数
+  // 修改防抖函数
   const debounceResize = useCallback(() => {
     if (resizeTimeoutRef.current) {
       clearTimeout(resizeTimeoutRef.current);
@@ -33,9 +33,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         width: window.innerWidth,
         height: window.innerHeight,
       });
-
-      // 重置组件状态
-      setImagesLoaded(false);
 
       // 清除所有现有的 ScrollTrigger 实例
       ScrollTrigger.getAll().forEach((st) => st.kill());
@@ -78,12 +75,15 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
-    // 初始化：确保内容完全隐藏
-    gsap.set(wrapper, {
-      autoAlpha: 0,
-      x: 20,
-      visibility: "hidden",
-    });
+    // 只在组件首次加载时执行入场动画
+    if (!imagesLoaded) {
+      // 初始化：确保内容完全隐藏
+      gsap.set(wrapper, {
+        autoAlpha: 0,
+        x: 20,
+        visibility: "hidden",
+      });
+    }
 
     // 设置每个图片的初始位置（相对位置）
     gsap.set(items, {
@@ -115,24 +115,28 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
 
       await Promise.all(loadPromises);
 
-      // 创建显示序列
-      const showSequence = gsap.timeline({
-        onStart: () => {
-          gsap.set(wrapper, { visibility: "visible" });
-          setImagesLoaded(true);
-        },
-      });
+      // 只在组件首次加载时执行入场动画
+      if (!imagesLoaded) {
+        const showSequence = gsap.timeline({
+          onStart: () => {
+            gsap.set(wrapper, { visibility: "visible" });
+            setImagesLoaded(true);
+          },
+        });
 
-      // 执行入场动画
-      showSequence.to(wrapper, {
-        autoAlpha: 1,
-        x: 0,
-        duration: 1,
-        ease: "power2.out",
-        onComplete: () => {
-          createScrollAnimation();
-        },
-      });
+        showSequence.to(wrapper, {
+          autoAlpha: 1,
+          x: 0,
+          duration: 1,
+          ease: "power2.out",
+          onComplete: () => {
+            createScrollAnimation();
+          },
+        });
+      } else {
+        // resize时直接创建滚动动画，不执行入场动画
+        createScrollAnimation();
+      }
     };
 
     preloadImages();

@@ -75,9 +75,8 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
-    // 只在组件首次加载时执行入场动画
+    // 只在组件首次加载时设置初始透明度
     if (!imagesLoaded) {
-      // 初始化：确保内容完全隐藏
       gsap.set(wrapper, {
         autoAlpha: 0,
         x: 20,
@@ -115,28 +114,24 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
 
       await Promise.all(loadPromises);
 
-      // 只在组件首次加载时执行入场动画
-      if (!imagesLoaded) {
-        const showSequence = gsap.timeline({
-          onStart: () => {
-            gsap.set(wrapper, { visibility: "visible" });
-            setImagesLoaded(true);
-          },
-        });
+      // 创建显示序列
+      const showSequence = gsap.timeline({
+        onStart: () => {
+          gsap.set(wrapper, { visibility: "visible" });
+          setImagesLoaded(true);
+        },
+      });
 
-        showSequence.to(wrapper, {
-          autoAlpha: 1,
-          x: 0,
-          duration: 1,
-          ease: "power2.out",
-          onComplete: () => {
-            createScrollAnimation();
-          },
-        });
-      } else {
-        // resize时直接创建滚动动画，不执行入场动画
-        createScrollAnimation();
-      }
+      // 执行入场动画
+      showSequence.to(wrapper, {
+        autoAlpha: 1,
+        x: 0,
+        duration: 1,
+        ease: "power2.out",
+        onComplete: () => {
+          createScrollAnimation();
+        },
+      });
     };
 
     preloadImages();

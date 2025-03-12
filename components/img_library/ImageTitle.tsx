@@ -25,13 +25,28 @@ const ImageTitle = () => {
 
       // 创建鼠标悬停时的动画
       const tl = gsap.timeline({ paused: true });
-      tl.to(titleElement, {
-        duration: 1.5,
-        scrollLeft: scrollDistance,
-      });
+      tl.fromTo(
+        titleElement,
+        { scrollLeft: 0 },
+        {
+          scrollLeft: scrollDistance,
+          duration: 1.5,
+          ease: "power2.out",
+          onComplete: () => {
+            titleElement.scrollLeft = scrollDistance;
+          },
+          onReverseComplete: () => {
+            titleElement.scrollLeft = 0;
+          },
+        }
+      );
 
-      const handleEnter = () => tl.play();
-      const handleLeave = () => tl.reverse();
+      const handleEnter = () => {
+        tl.play();
+      };
+      const handleLeave = () => {
+        tl.reverse();
+      };
 
       // 添加鼠标事件监听
       titleElement.addEventListener("mouseenter", handleEnter);

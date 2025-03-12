@@ -20,6 +20,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     (state) => state.setCurrentImage
   );
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
   // 修改防抖函数
@@ -78,16 +79,25 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
-    // 初始设置所有图片和容器为隐藏状态
-    gsap.set(items, {
-      autoAlpha: 0,
-    });
+    // 只在初始加载时设置opacity
+    if (!initialLoadComplete) {
+      gsap.set(items, {
+        autoAlpha: 0,
+      });
 
-    gsap.set(wrapper, {
-      autoAlpha: 0,
-      x: 20,
-      visibility: "hidden",
-    });
+      gsap.set(wrapper, {
+        autoAlpha: 0,
+        x: 20,
+        visibility: "hidden",
+      });
+    } else {
+      // 在resize时保持可见性
+      gsap.set(wrapper, {
+        autoAlpha: 1,
+        x: 0,
+        visibility: "visible",
+      });
+    }
 
     // 设置每个图片的初始位置（相对位置）
     gsap.set(items, {
@@ -125,29 +135,36 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       // 等待前两张图片加载完成
       await Promise.all(loadFirstTwo);
 
-      // 显示前两张图片和容器
-      const showSequence = gsap.timeline({
-        onStart: () => {
-          gsap.set(wrapper, { visibility: "visible" });
-          gsap.set(firstTwoImages, { autoAlpha: 1 });
-          setImagesLoaded(true);
-        },
-      });
+      if (!initialLoadComplete) {
+        // 只在初始加载时执行入场动画
+        const showSequence = gsap.timeline({
+          onStart: () => {
+            gsap.set(wrapper, { visibility: "visible" });
+            gsap.set(firstTwoImages, { autoAlpha: 1 });
+            setImagesLoaded(true);
+          },
+        });
 
-      // 执行入场动画
-      showSequence.to(wrapper, {
-        autoAlpha: 1,
-        x: 0,
-        duration: 1,
-        ease: "power2.out",
-        onComplete: () => {
-          createScrollAnimation();
-        },
-      });
+        showSequence.to(wrapper, {
+          autoAlpha: 1,
+          x: 0,
+          duration: 1,
+          ease: "power2.out",
+          onComplete: () => {
+            setInitialLoadComplete(true);
+            createScrollAnimation();
+          },
+        });
+      } else {
+        // resize时直接创建滚动动画
+        gsap.set(firstTwoImages, { autoAlpha: 1 });
+        setImagesLoaded(true);
+        createScrollAnimation();
+      }
 
       // 异步加载剩余图片
       if (remainingImages.length > 0) {
-        const loadRemaining = remainingImages.map((item, index) => {
+        const loadRemaining = remainingImages.map((item) => {
           return new Promise((resolve) => {
             const img = item.querySelector("img");
             if (img?.complete) {
@@ -243,7 +260,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         });
       });
     };
-  }, [images, dimensions]);
+  }, [images, dimensions, initialLoadComplete]);
 
   return (
     <div

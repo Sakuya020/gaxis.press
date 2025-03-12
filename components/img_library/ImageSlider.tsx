@@ -78,14 +78,16 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     const margin = dimensions.width - slideWidth;
     const triggerPoint = dimensions.width / 3;
 
-    // 只在组件首次加载时设置初始透明度
-    if (!imagesLoaded) {
-      gsap.set(wrapper, {
-        autoAlpha: 0,
-        x: 20,
-        visibility: "hidden",
-      });
-    }
+    // 初始设置所有图片和容器为隐藏状态
+    gsap.set(items, {
+      autoAlpha: 0,
+    });
+
+    gsap.set(wrapper, {
+      autoAlpha: 0,
+      x: 20,
+      visibility: "hidden",
+    });
 
     // 设置每个图片的初始位置（相对位置）
     gsap.set(items, {
@@ -103,24 +105,31 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
 
     // 修改预加载图片的逻辑
     const preloadImages = async () => {
-      const imagesToLoad = Array.from(items).slice(0, 2);
-      const loadPromises = imagesToLoad.map((item) => {
+      // 优先加载前两张图片
+      const firstTwoImages = Array.from(items).slice(0, 2);
+      const remainingImages = Array.from(items).slice(2);
+
+      // 加载前两张图片
+      const loadFirstTwo = firstTwoImages.map((item) => {
         return new Promise((resolve) => {
           const img = item.querySelector("img");
           if (img?.complete) {
             resolve(true);
           } else {
             img?.addEventListener("load", () => resolve(true));
+            img?.addEventListener("error", () => resolve(false));
           }
         });
       });
 
-      await Promise.all(loadPromises);
+      // 等待前两张图片加载完成
+      await Promise.all(loadFirstTwo);
 
-      // 创建显示序列
+      // 显示前两张图片和容器
       const showSequence = gsap.timeline({
         onStart: () => {
           gsap.set(wrapper, { visibility: "visible" });
+          gsap.set(firstTwoImages, { autoAlpha: 1 });
           setImagesLoaded(true);
         },
       });
@@ -135,6 +144,28 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
           createScrollAnimation();
         },
       });
+
+      // 异步加载剩余图片
+      if (remainingImages.length > 0) {
+        const loadRemaining = remainingImages.map((item, index) => {
+          return new Promise((resolve) => {
+            const img = item.querySelector("img");
+            if (img?.complete) {
+              gsap.to(item, { autoAlpha: 1, duration: 0.3 });
+              resolve(true);
+            } else {
+              img?.addEventListener("load", () => {
+                gsap.to(item, { autoAlpha: 1, duration: 0.3 });
+                resolve(true);
+              });
+              img?.addEventListener("error", () => resolve(false));
+            }
+          });
+        });
+
+        // 后台加载剩余图片
+        Promise.all(loadRemaining).catch(console.error);
+      }
     };
 
     preloadImages();

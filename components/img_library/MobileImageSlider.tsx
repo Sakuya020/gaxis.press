@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { cn, getImageUrl } from "@/lib/utils";
 import { ImageType } from "@/lib/types";
@@ -22,24 +22,57 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
   const [imagesLoaded, setImagesLoaded] = useState(0);
   const isScrollingDown = useRef(false);
   const lastScrollY = useRef(0);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>();
 
   // 创建扩展后的图片数组（在原数组最后添加第一张图片）
   const extendedImages = [...images, images[0]];
 
-  // 初始化尺寸，在屏幕尺寸变化时更新
+  // 添加清理和重置函数
+  const resetSlider = useCallback(() => {
+    // 清除所有 ScrollTrigger 实例
+    ScrollTrigger.getAll().forEach((st) => st.kill());
+
+    // 清除现有的时间线
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+      timelineRef.current = null;
+    }
+
+    // 重置状态
+    setImagesLoaded(0);
+    setIsDragging(false);
+    touchStartRef.current = 0;
+    scrollStartRef.current = 0;
+    lastScrollY.current = 0;
+  }, []);
+
+  // 修改尺寸更新逻辑
   useEffect(() => {
     const updateDimensions = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+
+      resizeTimeoutRef.current = setTimeout(() => {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+        resetSlider();
+      }, 250);
     };
 
     updateDimensions();
 
     window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, [images]);
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      resetSlider();
+    };
+  }, [resetSlider]);
 
   // 将水平滑动转换为垂直滚动
   useEffect(() => {
@@ -64,7 +97,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       }
 
       const scrollDelta = touchStartRef.current - e.touches[0].clientX;
-      const newScrollY = scrollStartRef.current + scrollDelta * 2;
+      const newScrollY = scrollStartRef.current + scrollDelta * 3.5;
 
       // 检测滚动方向
       isScrollingDown.current = newScrollY > lastScrollY.current;
@@ -112,7 +145,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       section.removeEventListener("touchmove", handleTouchMove);
       section.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [images.length]);
+  }, [images.length, dimensions]);
 
   useGSAP(() => {
     if (!sectionRef.current || !wrapperRef.current) return;

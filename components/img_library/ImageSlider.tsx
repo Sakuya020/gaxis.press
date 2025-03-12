@@ -42,8 +42,11 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
         timelineRef.current.kill();
         timelineRef.current = null;
       }
+
+      // resize 后重置为第一张图片
+      setCurrentImage(images[0]);
     }, 250);
-  }, []);
+  }, [setCurrentImage, images]);
 
   useEffect(() => {
     setCurrentImage(images[0]);

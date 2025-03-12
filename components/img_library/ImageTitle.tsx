@@ -45,7 +45,8 @@ const ImageTitle = () => {
         tl.play();
       };
       const handleLeave = () => {
-        tl.reverse();
+        tl.pause();
+        titleElement.scrollLeft = 0;
       };
 
       // 添加鼠标事件监听

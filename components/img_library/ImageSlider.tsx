@@ -172,6 +172,24 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
               }
             });
           },
+          onScrubComplete: (self) => {
+            // 在滚动结束时检查同步
+            const progress = self.progress;
+
+            // 如果滚动进度接近0，说明在顶部
+            if (progress < 0.01) {
+              setCurrentImage(images[0]);
+              return;
+            }
+
+            // 检查其他项目
+            items.forEach((item, index) => {
+              const x = gsap.getProperty(item, "x") as number;
+              if (x < triggerPoint && x > 0) {
+                setCurrentImage(images[index]);
+              }
+            });
+          },
         },
       });
 

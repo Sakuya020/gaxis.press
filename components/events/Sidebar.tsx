@@ -33,6 +33,9 @@ const EventsSidebar = () => {
           });
         }
 
+        // 当sidebar打开时，禁用背景滚动
+        document.body.style.overflow = "hidden";
+
         gsap.fromTo(
           ".events-sidebar",
           {
@@ -59,6 +62,9 @@ const EventsSidebar = () => {
           duration: 0,
         });
 
+        // 当sidebar关闭时，恢复背景滚动
+        document.body.style.overflow = "auto";
+
         gsap.to(".events-sidebar", {
           width: "0px",
           border: "none",
@@ -79,7 +85,7 @@ const EventsSidebar = () => {
   }, [isOpen]);
 
   return (
-    <aside className="events-sidebar fixed w-0 h-full top-[150px] right-0 bg-background z-20 border-b">
+    <aside className="events-sidebar fixed w-0 h-full top-[150px] right-0 bg-background z-20 border-b overflow-y-auto">
       <Events />
     </aside>
   );

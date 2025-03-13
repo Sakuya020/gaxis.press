@@ -25,6 +25,8 @@ export const metadata: Metadata = {
     "G Axis Press is the self-publication practice of NY-based designer Joyce Shi",
 };
 
+export const revalidate = 600; // revalidate data every 10 minutes
+
 export default function RootLayout({
   children,
 }: Readonly<{

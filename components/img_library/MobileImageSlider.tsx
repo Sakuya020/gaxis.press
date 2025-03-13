@@ -74,7 +74,6 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     if (!section) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      e.preventDefault(); // 防止回弹
       touchStartRef.current = e.touches[0].clientX;
       scrollStartRef.current = window.scrollY;
       touchTimeRef.current = Date.now();
@@ -82,12 +81,13 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
       if (!section) return;
 
       const touchDelta = Math.abs(touchStartRef.current - e.touches[0].clientX);
-      if (touchDelta > 10) {
+      if (touchDelta > 5) {
+        // 降低拖动阈值
         setIsDragging(true);
+        e.preventDefault(); // 只在确认拖动时阻止默认行为
       }
 
       const scrollDelta = touchStartRef.current - e.touches[0].clientX;
@@ -119,12 +119,15 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
       lastScrollY.current = newScrollY;
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (e: TouchEvent) => {
       const touchDuration = Date.now() - touchTimeRef.current;
-      // console.log("Touch end, duration:", touchDuration); // 调试日志
-      if (touchDuration < 200) {
+      const touchDelta = Math.abs(
+        touchStartRef.current - (e.changedTouches[0]?.clientX || 0)
+      );
+
+      // 只有在触摸时间短且移动距离小的情况下才重置isDragging
+      if (touchDuration < 200 && touchDelta < 5) {
         setIsDragging(false);
-        // console.log("Reset isDragging to false"); // 调试日志
       }
     };
 
@@ -290,7 +293,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
             if (!image) return null;
             const imgUrl = getImageUrl(image);
             return (
-              <div key={title} className="item absolute inset-0 h-full">
+              <div key={title + index} className="item absolute inset-0 h-full">
                 <figure
                   className={cn(
                     "relative h-full w-full border-background",
@@ -298,6 +301,8 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
                   )}
                   onClick={(e) => {
                     if (!isDragging && link) {
+                      e.preventDefault();
+                      e.stopPropagation();
                       window.open(link, "_blank");
                     }
                   }}

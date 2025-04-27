@@ -316,6 +316,7 @@ const ImageSlider = ({ images }: { images: ImageType[] }) => {
                     fill
                     style={{ objectFit: "cover", aspectRatio: "2247/1500" }}
                     onLoad={handleImageLoad}
+                    quality={100}
                   />
                 </figure>
               </div>

@@ -4,7 +4,7 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import Events from "./Events";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 gsap.registerPlugin(useGSAP);
@@ -33,9 +33,6 @@ const EventsSidebar = () => {
           });
         }
 
-        // 当sidebar打开时，禁用背景滚动
-        document.body.style.overflow = "hidden";
-
         gsap.fromTo(
           ".events-sidebar",
           {
@@ -62,9 +59,6 @@ const EventsSidebar = () => {
           duration: 0,
         });
 
-        // 当sidebar关闭时，恢复背景滚动
-        document.body.style.overflow = "auto";
-
         gsap.to(".events-sidebar", {
           width: "0px",
           border: "none",
@@ -84,8 +78,25 @@ const EventsSidebar = () => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   return (
-    <aside className="events-sidebar fixed w-0 h-full top-[150px] right-0 bg-background z-20 border-b overflow-y-auto">
+    <aside
+      className={`events-sidebar fixed w-0 top-[150px] right-0 bg-background z-20 border-b ${
+        isOpen
+          ? "h-[calc(100vh-150px)] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          : "h-full overflow-hidden"
+      }`}
+    >
       <Events />
     </aside>
   );

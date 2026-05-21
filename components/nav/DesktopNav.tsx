@@ -37,7 +37,7 @@ const DesktopNav = () => {
             <div>
               <p>
                 <span className="lg:hidden text-highlight">G Axis Press </span>
-                is the self-publication practice of NY-based designer{" "}
+                is an independent publication practice by NY-based designer{" "}
                 <a
                   href={links.joyce.href}
                   className="underline"

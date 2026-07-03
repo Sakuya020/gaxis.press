@@ -51,7 +51,7 @@ const CatalogueLine = ({
           {availableAt && (
             <>
               <span>
-                Available at{" "}
+                available at{" "}
                 {availableAt?.map((item, index) => {
                   return (
                     <div key={index} className="inline-block">
